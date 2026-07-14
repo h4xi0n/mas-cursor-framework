@@ -3,6 +3,12 @@
 .SYNOPSIS
   Packages the MAS Cursor framework into a portable folder and/or zip.
 
+.PARAMETER OutputDir
+  Folder export destination. Accepts a parent directory or a path that already
+  ends with mas-cursor-framework; otherwise mas-cursor-framework is appended.
+  When set alone, writes the bundle folder only (no zip). Add -OutputPath to
+  also create a zip from the same staged bundle.
+
 .EXAMPLE
   .\export-mas-framework.ps1
   Creates zip on Desktop (default).
@@ -68,6 +74,7 @@ function Copy-Rel {
     return $true
 }
 
+# Normalize -OutputDir: use path as-is when it already ends with mas-cursor-framework.
 function Resolve-BundleOutputDir {
     param([string]$Dir)
     $resolved = [System.IO.Path]::GetFullPath($Dir)
@@ -133,6 +140,7 @@ $hooksTemplate = @{
 }
 $hooksTemplate | ConvertTo-Json -Depth 6 | Set-Content (Join-Path $bundleRoot "hooks.mas.template.json") -Encoding UTF8
 
+# Export modes: OutputDir only -> folder; no OutputDir -> zip; both -> folder + zip.
 $wantFolderExport = -not [string]::IsNullOrWhiteSpace($OutputDir)
 $wantZipExport = [string]::IsNullOrWhiteSpace($OutputDir) -or -not [string]::IsNullOrWhiteSpace($OutputPath)
 
