@@ -81,3 +81,18 @@ After global install, initialize per-project MAS context:
 ~/.cursor/skills/multi-agent-system/scripts/init-mas-context.ps1 -ProjectPath "C:\path\to\your\project" -Stack auto
 ```
 
+## Publish to GitHub
+
+```bash
+cd mas-cursor-framework
+git init
+git add .
+git commit -m "feat: package MAS Cursor framework v1.0.0"
+git remote add origin https://github.com/<you>/mas-cursor-framework.git
+git branch -M main
+git push -u origin main
+```
+
+## License
+
+License TBD — add your chosen license before public release.
