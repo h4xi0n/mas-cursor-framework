@@ -1,62 +1,6 @@
 # MAS Framework — Transfer & Install
 
-## Simplest method (3 steps)
-
-1. **On this PC** — run export once (or zip the folder `mas-cursor-framework` after export):
-   ```powershell
-   cd $env:USERPROFILE\.cursor\skills\multi-agent-system\install
-   .\export-mas-framework.ps1
-   ```
-2. **Copy** `mas-cursor-framework.zip` to the other computer (USB, Google Drive, email, etc.).
-3. **On the other PC** — unzip, open the `mas-cursor-framework` folder, **double-click `install.bat`** (Windows).
-
-   Or manually: copy the folders `skills`, `commands`, `rules`, `hooks` from inside the zip into:
-   - Windows: `C:\Users\<you>\.cursor\`
-   - Mac: `~/.cursor/`
-
-Then **reload Cursor**. Type `/mas` in chat. Done.
-
-No terminal required on the new PC if you use drag-and-drop or `install.bat`.
-
----
-
-## Other methods
-
-Move the Multi-Agent System (MAS) to another PC or Mac: **export a zip on the source machine**, copy it, **run the installer on the target**.
-
-## Quick start (scripts)
-
-### On this machine (export)
-
-**Windows (PowerShell):**
-
-```powershell
-cd $env:USERPROFILE\.cursor\skills\multi-agent-system\install
-.\export-mas-framework.ps1
-```
-
-Creates: `%USERPROFILE%\Desktop\mas-cursor-framework.zip` (or `-OutputPath`).
-
-**Folder export (no zip):**
-
-```powershell
-.\export-mas-framework.ps1 -OutputDir "C:\Users\arunk\AndroidStudioProjects\mas-cursor-framework"
-```
-
-**Folder + zip:**
-
-```powershell
-.\export-mas-framework.ps1 -OutputDir "C:\dev\out" -OutputPath "C:\dev\mas.zip"
-```
-
-| `-OutputDir` | `-OutputPath` | Result |
-|--------------|---------------|--------|
-| unset | unset | Zip to Desktop |
-| set | unset | Folder only |
-| unset | set | Zip only |
-| set | set | Folder and zip |
-
-### On the new machine (install)
+On the new machine (install)
 
 **Windows:**
 
