@@ -81,6 +81,3 @@ After global install, initialize per-project MAS context:
 ~/.cursor/skills/multi-agent-system/scripts/init-mas-context.ps1 -ProjectPath "C:\path\to\your\project" -Stack auto
 ```
 
-## License
-
-License TBD — add your chosen license before public release.
