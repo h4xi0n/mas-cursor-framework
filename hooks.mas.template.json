@@ -1,0 +1,15 @@
+﻿{
+    "version":  1,
+    "hooks":  {
+                  "subagentStop":  [
+                                       {
+                                           "command":  "MAS_HOOK_SUBAGENT"
+                                       }
+                                   ],
+                  "sessionStart":  [
+                                       {
+                                           "command":  "MAS_HOOK_SESSION"
+                                       }
+                                   ]
+              }
+}

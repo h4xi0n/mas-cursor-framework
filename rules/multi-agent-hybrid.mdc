@@ -1,0 +1,27 @@
+---
+description: Multi-agent hybrid context loading and /mas Coordinator activation
+alwaysApply: true
+---
+
+# Multi-Agent Context (Hybrid)
+
+**Default (no `/mas`):** Do not preload `.ai/context/` unless the task needs project facts. If needed, read only the smallest file (usually `memory.md`).
+
+When the user message starts with `/mas-lite` or `/mas lite`:
+
+- Load skill `mas-lite` then act as Coordinator (MAS Lite Mode)
+- Read `.ai/context/memory.md` only at startup
+- Tier S/M/L pipelines; max 1–3 foreground subagents
+- Handoffs: `handoff-format-lite.md`; skip Documenter and full Reviewer unless user asks
+
+When the user message starts with `/mas` (not lite), uses the `/mas` slash command, or explicitly requests full Coordinator:
+
+- Load skill `multi-agent-system` (or `mas` alias — same workflow)
+- Read in order: `.ai/context/project.md`, `.ai/context/coding_standards.md`, `.ai/context/memory.md`
+- Act ONLY as Coordinator until workflow completes
+- Never implement, architect, review, or debug directly
+- Use structured handoffs in `.ai/handoffs/` with `SPAWN_STATUS: spawned`
+- Delegate every specialist step via Task tool (`subagent_type: generalPurpose`, `run_in_background: false`) per `~/.cursor/skills/multi-agent-system/protocol/subagent-spawn.md`
+- Wait for each Task to return before chaining `NEXT_AGENT`; never implement specialist work inline
+
+Normal chat behavior is unchanged unless `/mas` or `/mas-lite` is used.
