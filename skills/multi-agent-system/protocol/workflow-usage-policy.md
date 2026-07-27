@@ -37,6 +37,9 @@ Ephemeral file: `.ai/context/workflow-sessions/{TASK_ID}.json`
   "tier": "M",
   "type": "feature",
   "started_at": "2026-07-10T08:14:00+05:30",
+  "reviewer_loop_count": 0,
+  "debate_used": false,
+  "debate_round": 0,
   "steps": [
     {
       "agent": "general-dev",
@@ -56,6 +59,9 @@ Ephemeral file: `.ai/context/workflow-sessions/{TASK_ID}.json`
 | `mode` | `FULL` \| `LITE` | From handoff / coordinator |
 | `tier` | `S` \| `M` \| `L` \| `L+` \| `none` | `none` for full `/mas` without tier |
 | `type` | `feature` \| `bugfix` | `bugfix` if chain included bug-fix agent |
+| `reviewer_loop_count` | int | Incremented by Coordinator on each Reviewer `Approved: NO` |
+| `debate_used` | bool | `true` after debate-synthesizer spawn completes |
+| `debate_round` | int | Debate persona rounds completed (max `MAX_DEBATE_ROUNDS`) |
 | `steps[].agent` | slug | `planner`, `general-dev`, `reviewer`, etc. |
 | `steps[].model` | string | Task `model` param or `default` |
 | `steps[].model_class` | `normal` \| `fast` \| `thinking` | Derived — see below |
@@ -71,7 +77,7 @@ Ephemeral file: `.ai/context/workflow-sessions/{TASK_ID}.json`
 | `default` or no model param | `normal` |
 | else | `normal` |
 
-Scripts derive when `-ModelClass` omitted on `record-workflow-step.ps1`.
+Scripts derive when `-ModelClass` omitted on `record-workflow-step.ps1`. Prefer explicit `-ModelClass` from [spawn-model-policy.md](spawn-model-policy.md) resolution at spawn time.
 
 ## Memory bullet format
 
@@ -131,7 +137,7 @@ Coordinator treats Usage Report as **supplement** when Task metadata absent; nev
 |------|--------|
 | `TASK_ID` assigned, before first spawn | `init-workflow-session.ps1` |
 | Each Task returns `DONE` | `record-workflow-step.ps1` (+ parse Usage Report / Task metadata) |
-| Reviewer `Approved: YES` + qualified (`FILES` non-empty) | `append-daily-changelog.ps1` then `finalize-workflow-usage.ps1` |
+| Reviewer `Approved: YES` + qualified (`FILES` non-empty) | `append-daily-changelog.ps1` then `finalize-workflow-usage.ps1`; optional `token-auditor` spawn (full `/mas` only) |
 | Reviewer `Approved: NO` (continue chain) | no finalize; session kept; re-record replaces step for same agent |
 | Workflow cancelled / user abort | `cancel-workflow-session.ps1` |
 | Planning-only (no `FILES`) | no finalize |

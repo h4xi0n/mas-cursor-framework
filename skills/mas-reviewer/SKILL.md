@@ -37,7 +37,8 @@ Spawned by Coordinator via **Task** (`generalPurpose`, foreground). Read [subage
 7. When handoff or chain history indicates **osint workflow** (`TARGET_AGENT: osint` in chain history or `CONTEXT` notes osint), read `.ai/context/osint/{TASK_ID}.md` when present — run **OSS Alignment Verification** (step 0c).
 8. When `.ai/context/test-strategies/{TASK_ID}.md` exists — read for **Test Strategy Verification** (step 0d).
 9. When handoff notes release fix chain (`RELEASE_BRIEF`, `FAILURE_CATEGORIES`, or `CONTEXT` release workflow), read `.ai/context/release-readiness/{TASK_ID}.md` when present — run **Release Readiness Verification** (step 0e).
-10. If handoff type is **post-bugfix** (contains `ORIGINAL_SYMPTOM`, `ROOT_CAUSE`, or `REPRO_STEPS`) → run **Post-Bug Fix Verification** (step 0) before general review.
+10. Validate deliverable briefs against [brief-schemas.md](../multi-agent-system/protocol/brief-schemas.md) — flag missing required sections in findings.
+11. If handoff type is **post-bugfix** (contains `ORIGINAL_SYMPTOM`, `ROOT_CAUSE`, or `REPRO_STEPS`) → run **Post-Bug Fix Verification** (step 0) before general review.
 
 ## Review Workflow
 

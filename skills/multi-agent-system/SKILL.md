@@ -70,6 +70,12 @@ flowchart LR
     Coordinator --> Reviewer
     Planner --> Handoff[.ai/handoffs/]
     Reviewer --> Memory[.ai/context/memory.md]
+    Reviewer -.->|2nd NO| Debate[Debate Synthesizer]
+    Debate --> DebateBrief[".ai/context/debates/"]
+    Debate --> BugFix
+    Reviewer -.->|Approved YES| Finalize[finalize-workflow-usage]
+    Finalize -.->|optional| TokenAuditor[Token Auditor]
+    TokenAuditor --> AuditBrief[".ai/context/audits/"]
     Reviewer -.->|user confirms| Commit[Commit]
     Commit --> Remote[origin push]
 ```
@@ -93,14 +99,15 @@ Creates `.ai/context/` including `memory.md` and **daily changelog** (`daily-cha
 
 ## Transfer to Another PC / Mac
 
-See [install/README.md](install/README.md). Export zip on source machine, run installer on target:
+See [install/README.md](install/README.md) (pointer) or canonical [skills/multi-agent-system/install/README.md](../multi-agent-system/install/README.md). Export zip on source machine, run installer on target:
 
 ```powershell
-# Export (Windows)
+# Export (Windows) — canonical path
 ~/.cursor/skills/multi-agent-system/install/export-mas-framework.ps1
 
 # Install (Windows)
-.\install-mas-framework.ps1 -ZipPath ~\Desktop\mas-cursor-framework.zip
+cd skills\multi-agent-system\install
+.\install-mas-framework.ps1
 ```
 
 ```bash
@@ -131,16 +138,21 @@ See [install/README.md](install/README.md). Export zip on source machine, run in
 | Documenter | mas-documenter |
 | Reviewer | mas-reviewer |
 | Commit | mas-commit |
+| Debate Synthesizer | mas-debate |
+| Token Auditor | mas-token-auditor |
 
 ## Protocol Files
 
 - [handoff-format.md](protocol/handoff-format.md) — full `/mas`
 - [handoff-format-lite.md](protocol/handoff-format-lite.md) — `/mas-lite`
+- [spawn-model-policy.md](protocol/spawn-model-policy.md) — MODEL_CLASS → Task model
+- [brief-schemas.md](protocol/brief-schemas.md) — required brief sections
 - [subagent-spawn.md](protocol/subagent-spawn.md) — Task tool spawn rules (Coordinator)
 - [subagent-role.md](protocol/subagent-role.md) — specialist subagent behavior
 - [reviewer-lite.md](references/reviewer-lite.md) — lite Reviewer only
-- [read-order.md](protocol/read-order.md)
-- [token-rules.md](protocol/token-rules.md)
+- [read-order.md](protocol/read-order.md) — subscription matrix
+- [token-rules.md](protocol/token-rules.md) — caps and artifact-forward
+- [workflow-usage-policy.md](protocol/workflow-usage-policy.md) — session JSON telemetry
 - [memory-policy.md](protocol/memory-policy.md)
 - [daily-changelog-policy.md](protocol/daily-changelog-policy.md)
 

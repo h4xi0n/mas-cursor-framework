@@ -36,6 +36,7 @@ Spawned by Coordinator via **Task** (`generalPurpose`, foreground). Read [subage
 3. Read [open-source-intelligence-standards.md](../multi-agent-system/references/open-source-intelligence-standards.md).
 4. Read `.ai/context/project.md` on demand for stack-aware source prioritization.
 5. Read **only** files listed in handoff `FILES` for local seed context — do not broad-scan the repo.
+6. When writing brief, include sections per [brief-schemas.md](../multi-agent-system/protocol/brief-schemas.md) osint type.
 
 ## Workflow
 

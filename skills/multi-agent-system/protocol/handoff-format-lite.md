@@ -6,8 +6,12 @@ Max **12 lines**. Write to `.ai/handoffs/{TASK_ID}.md` only — never paste in c
 TASK_ID: <id>
 MODE: LITE
 TIER: S|M|L|L+
-TARGET_AGENT: <osint|imaginer|perf-optimizer|release-readiness|test-strategy|bug-fix|android-dev|general-dev|ux-intelligence|brainstorm|planner|reviewer>
+TARGET_AGENT: <osint|imaginer|perf-optimizer|release-readiness|test-strategy|bug-fix|android-dev|general-dev|ux-intelligence|brainstorm|planner|reviewer|debate-synthesizer|token-auditor>
 SPAWN_STATUS: spawned
+MC: fast|normal|thinking          # optional; lite MODEL_CLASS — see spawn-model-policy.md
+BP: .ai/context/osint/{TASK_ID}.md # optional BRIEF_PATH
+SEC: Recommended, Logic Flow      # optional SECTIONS slice
+DT: reviewer-rejection-2          # Coordinator-only debate trigger
 UI_SCOPE: logic-only
 GOAL: <one sentence>
 CONTEXT:
@@ -19,6 +23,17 @@ REVIEWER_MODE: lite
 NEXT_AGENT: <none|reviewer>
 DONE
 ```
+
+## Lite abbreviations
+
+| Full field | Lite | Example |
+|------------|------|---------|
+| `MODEL_CLASS:` | `MC:` | `MC: fast` |
+| `BRIEF_PATH:` | `BP:` | `BP: .ai/context/osint/MAS-01.md` |
+| `SECTIONS:` | `SEC:` | `SEC: Recommended, Logic Flow` |
+| `DEBATE_TRIGGER:` | `DT:` | `DT: reviewer-rejection-2` |
+
+Drop `CONTEXT` bullets in favor of `BP:` when brief exists. Max **12 lines** total.
 
 ## Output (Lite)
 

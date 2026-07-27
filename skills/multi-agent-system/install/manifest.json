@@ -22,7 +22,9 @@
     "mas-documenter",
     "mas-spec-reader",
     "mas-commit",
-    "mas-lite"
+    "mas-lite",
+    "mas-debate",
+    "mas-token-auditor"
   ],
   "commands": ["mas.md", "mas-lite.md"],
   "rules": ["multi-agent-hybrid.mdc"],

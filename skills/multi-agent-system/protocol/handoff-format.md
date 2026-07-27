@@ -8,8 +8,11 @@ All agent communication uses structured handoffs written to `.ai/handoffs/{TASK_
 TASK_ID: <id>
 MODE: FULL | LITE
 TIER: S | M | L | L+ | none
-TARGET_AGENT: <spec-reader|brainstorm|planner|architect|android-dev|general-dev|osint|imaginer|ux-intelligence|perf-optimizer|release-readiness|test-strategy|bug-fix|documenter|reviewer|commit>
+TARGET_AGENT: <spec-reader|brainstorm|planner|architect|android-dev|general-dev|osint|imaginer|ux-intelligence|perf-optimizer|release-readiness|test-strategy|bug-fix|documenter|reviewer|commit|debate-synthesizer|token-auditor>
 SPAWN_STATUS: spawned
+MODEL_CLASS: fast | normal | thinking    # optional; default from spawn-model-policy.md
+BRIEF_PATH: .ai/context/plans/{TASK_ID}.md # optional artifact forward — path only, not body
+SECTIONS: Tasks, Dependencies            # optional slice; omit = read full brief
 UI_SCOPE: logic-only | ui-allowed
 GOAL: <single sentence>
 DOCS:
@@ -26,6 +29,43 @@ DELIVERABLE: <expected result>
 NEXT_AGENT: <agent or none>
 DONE
 ```
+
+### Coordinator → Debate Synthesizer Handoff
+
+Trigger: `reviewer_loop_count >= 2` and `debate_used == false` in session JSON (Coordinator-only).
+
+```
+TASK_ID: <id>
+TARGET_AGENT: debate-synthesizer
+DEBATE_TRIGGER: reviewer-rejection-2
+GOAL: Synthesize security and simplicity perspectives on Reviewer rejection.
+FILES:
+* patched paths from Reviewer handoff
+CONTEXT:
+* Reviewer findings summary (filtered — not full chain)
+BRIEF_PATH: .ai/context/debates/{TASK_ID}.md
+DELIVERABLE: Brief at .ai/context/debates/{TASK_ID}.md
+NEXT_AGENT: bug-fix
+DONE
+```
+
+Coordinator sets `debate_used: true` in session after debate Task returns. Max one debate session per `TASK_ID`.
+
+### Coordinator → Token Auditor Handoff
+
+Trigger: post `finalize-workflow-usage.ps1`, `Approved: YES`, non-empty `FILES`. Optional — skip planning-only and lite default.
+
+```
+TASK_ID: <id>
+TARGET_AGENT: token-auditor
+GOAL: Advisory token usage audit for completed workflow.
+BRIEF_PATH: .ai/context/workflow-sessions/{TASK_ID}.json
+DELIVERABLE: Brief at .ai/context/audits/{TASK_ID}.md
+NEXT_AGENT: none
+DONE
+```
+
+Auditor never blocks approval.
 
 ### Coordinator → Imaginer Handoff
 
@@ -255,6 +295,8 @@ DONE
 - Keep handoffs under 20 lines.
 - **`MODE`:** `FULL` for `/mas`; `LITE` for `/mas-lite` (required on every coordinator handoff).
 - **`TIER`:** `S` | `M` | `L` | `L+` for lite; `none` or omit semantics for full `/mas`.
+- **`MODEL_CLASS:`** optional — overrides [spawn-model-policy.md](spawn-model-policy.md) default for Task `model` param.
+- **`BRIEF_PATH:`** + optional **`SECTIONS:`** — artifact-forward; specialist reads path (and heading slice only when `SECTIONS` set). Prefer `BRIEF_PATH` over `CONTEXT` bullets when brief exists.
 - Reference `memory.md` by section name; never paste its contents.
 - Never paste entire conversations or codebases.
 - Coordinator writes handoff to disk; do not duplicate full handoff in chat.

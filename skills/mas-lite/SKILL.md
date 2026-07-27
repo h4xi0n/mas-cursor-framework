@@ -18,9 +18,10 @@ Low-token alternative to full `/mas`. Load [mas-coordinator](../mas-coordinator/
 2. Read **only** `.ai/context/memory.md` at startup (skip `project.md` / `coding_standards.md` unless implementation needs them — then read on demand).
 3. **Daily changelog:** inherit [mas-coordinator](../mas-coordinator/SKILL.md) Startup ensure + After Reviewer append — `MODE: LITE` does **not** skip changelog.
 4. **Workflow usage:** same init/record/finalize/cancel scripts as full `/mas` — `MODE: LITE` does **not** skip usage tracking; subagents omit `## Usage Report`.
-5. Use [handoff-format-lite.md](../multi-agent-system/protocol/handoff-format-lite.md) — not full handoff-format.md.
-6. Use **lite subagent prompt** (below) — never `Read protocol/`.
-7. Pick tier **S**, **M**, or **L** (auto-detect or user override).
+5. **Token auditor:** skip by default after finalize — spawn only when user requests (full `/mas` may opt-in).
+6. Use [handoff-format-lite.md](../multi-agent-system/protocol/handoff-format-lite.md) — not full handoff-format.md.
+7. Use **lite subagent prompt** (below) — never `Read protocol/`.
+8. Pick tier **S**, **M**, or **L** (auto-detect or user override).
 
 ## Tier Selection
 

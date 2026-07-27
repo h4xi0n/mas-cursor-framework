@@ -38,8 +38,8 @@ Spawned by Coordinator via **Task** (`generalPurpose`, foreground). Read [subage
 4. Read `.ai/context/release-readiness/{TASK_ID}.md` when present (or handoff `RELEASE_BRIEF`) — **release brief takes priority for which failures to fix**; fix P0 crash/ANR/edge-case items; map fixes to category IDs in output. If imagination brief also present, imagination informs crash root cause only.
 5. Read `.ai/context/osint/{TASK_ID}.md` when present — prioritize `Recommended Fix Strategy` from bug-mode research; confirm against local codebase.
 6. Read `.ai/context/imaginations/{TASK_ID}.md` when present — use suspected failure hops and data-flow table from Imaginer brief (**after** release and osint briefs if both exist).
-7. Read `.ai/context/test-strategies/{TASK_ID}.md` when present — use regression test recommendations from brief.
-8. Investigate only files relevant to the bug.
+7. Read `.ai/context/debates/{TASK_ID}.md` when `DEBATE_TRIGGER` on handoff or debate brief exists — prioritize **Consensus** action items in fix strategy.
+8. Read `.ai/context/test-strategies/{TASK_ID}.md` when present — use regression test recommendations from brief.
 9. For Android/Compose bugs: see [android-veteran-standards.md](../multi-agent-system/references/android-veteran-standards.md) Bug-Fix Patterns and [build-test-visual-qa.md](../multi-agent-system/references/build-test-visual-qa.md).
 
 ## Imagination Brief
@@ -77,6 +77,14 @@ When `.ai/context/test-strategies/{TASK_ID}.md` exists:
 - Use regression test recommendations from **Tests to Write**
 - Confirm or refute **Tests to Skip** decisions in output — note divergences
 - If brief missing, proceed normally
+
+## Debate Brief
+
+When `.ai/context/debates/{TASK_ID}.md` exists or handoff `DEBATE_TRIGGER` set:
+
+- Prioritize **Action items** from debate brief Consensus section
+- Reconcile debate action items with Reviewer findings — debate informs fix approach, Reviewer defines gate
+- If brief missing and no trigger, proceed normally
 
 ## Regression Context
 
@@ -130,6 +138,10 @@ used | N/A — <one line if used: confirmed/refuted top hop>
 ## Release Brief
 
 used | N/A — <one line if used: categories addressed>
+
+## Debate Brief
+
+used | N/A — <one line if used: consensus action items applied>
 
 ## Test Strategy Brief
 

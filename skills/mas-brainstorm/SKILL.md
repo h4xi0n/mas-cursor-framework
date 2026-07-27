@@ -52,6 +52,7 @@ Spawned by Coordinator via **Task** (`generalPurpose`, foreground). Read [subage
 4. If `.ai/context/specs/{TASK_ID}.md` exists — read acceptance criteria and API summary.
 5. Skim codebase for 1–2 similar features (logic layer only — ViewModels, repos, use cases, services).
 6. For Android: skim [android-veteran-standards.md](../multi-agent-system/references/android-veteran-standards.md) Architecture + Data sections — not Compose UI sections unless `ui-allowed`.
+7. When writing brief, include sections per [brief-schemas.md](../multi-agent-system/protocol/brief-schemas.md) brainstorm type.
 
 ## OSINT Brief
 

@@ -435,7 +435,7 @@ Reviewer handoff must include:
 
 Reviewer must run [build-test-visual-qa.md](../multi-agent-system/references/build-test-visual-qa.md) before `Approved: YES`.
 
-3. If Reviewer `Approved: NO` or `Issue Resolved: NO` → Coordinator routes back to **Bug Fix** with Reviewer findings (loop until resolved or user stops).
+3. If Reviewer `Approved: NO` or `Issue Resolved: NO` → Reviewer rejection loop (increment `reviewer_loop_count`; debate on 2nd rejection).
 4. Do not mark workflow complete until Reviewer confirms issue is **perfectly resolved** (bugs) or build + tests + visual QA pass (features).
 
 Route to **Commit** when:
@@ -450,9 +450,26 @@ Commit agent requires **two confirmations**: commit message, then push (unless `
 
 ## Handoff Execution (Task subagents — mandatory)
 
-Full protocol: [subagent-spawn.md](../multi-agent-system/protocol/subagent-spawn.md)
+Full protocol: [subagent-spawn.md](../multi-agent-system/protocol/subagent-spawn.md)  
+Model policy: [spawn-model-policy.md](../multi-agent-system/protocol/spawn-model-policy.md)
 
 **Every specialist step = one `Task` tool call.** Never perform specialist work in the Coordinator thread.
+
+### Spawn model
+
+1. Resolve `MODEL_CLASS` from handoff (`MODEL_CLASS:` or lite `MC:`) or [spawn-model-policy.md](../multi-agent-system/protocol/spawn-model-policy.md) default for `TARGET_AGENT`.
+2. Pass Task `model` hint when supported (`fast` → `composer-2.5-fast`, `thinking` → thinking-high family, `normal` → default).
+3. On unsupported hint → spawn with default; record `model: default` and policy `model_class` in session step.
+
+### Artifact-forward summaries
+
+After each specialist completes, user-visible summary format:
+
+```
+{Agent} complete — {one-line outcome}. Brief: {path}
+```
+
+Never paraphrase or paste full brief body in Coordinator chat. Use handoff `BRIEF_PATH` + optional `SECTIONS:` (lite: `BP:` / `SEC:`) instead of `CONTEXT` bullets when brief exists.
 
 ### Per-agent loop
 
@@ -462,13 +479,14 @@ Full protocol: [subagent-spawn.md](../multi-agent-system/protocol/subagent-spawn
 2. **Call `Task`** with:
    - `subagent_type`: `generalPurpose`
    - `run_in_background`: `false`
+   - `model`: from spawn-model-policy resolution (when supported)
    - `description`: `MAS {TARGET_AGENT} {TASK_ID}`
    - `prompt`: self-contained template from subagent-spawn.md (Lite block if `MODE: LITE`)
 3. **Wait** for Task to return — do not spawn the next agent in parallel.
 4. **Record workflow step** after Task returns `DONE`:
 
    ```powershell
-   powershell -File ~/.cursor/skills/multi-agent-system/scripts/record-workflow-step.ps1 -ProjectPath <workspace> -TaskId <TASK_ID> -Agent <slug> -Model <spawn model or default>
+   powershell -File ~/.cursor/skills/multi-agent-system/scripts/record-workflow-step.ps1 -ProjectPath <workspace> -TaskId <TASK_ID> -Agent <slug> -Model <spawn model or default> -ModelClass <fast|normal|thinking>
    ```
 
    Parse optional Task metadata for token usage (defensive; may be absent). For full `/mas` only, parse subagent `## Usage Report` (`Model`, `Class`, `Tokens: in/out`) and pass `-TokensIn`, `-TokensOut`, `-TokensSource usage_report` when present. Lite: skip Usage Report parsing. On script failure, log warning and continue.
@@ -476,11 +494,23 @@ Full protocol: [subagent-spawn.md](../multi-agent-system/protocol/subagent-spawn
 5. Verify subagent message ends with `DONE`. If not, one retry Task with "finish handoff; end with DONE".
 6. Update handoff `SPAWN_STATUS: complete` (or write `.ai/handoffs/{TASK_ID}-status.md` with one line).
 7. If `NEXT_AGENT` is not `none` → write **new** handoff for that agent → go to step 2.
-8. Brief user summary (max 8 lines). Long Reviewer output → optional `.ai/handoffs/{TASK_ID}-review.md`.
+8. Brief user summary — **artifact-forward** (one line + brief path; max 8 lines total). Long Reviewer output → optional `.ai/handoffs/{TASK_ID}-review.md`.
+
+### Reviewer rejection loop (MAS-01)
+
+On Reviewer `Approved: NO` or `Issue Resolved: NO`:
+
+1. Increment `reviewer_loop_count` in `.ai/context/workflow-sessions/{TASK_ID}.json`.
+2. **Loop 1** (`reviewer_loop_count == 1`): Task to **bug-fix** or **dev** with **filtered Reviewer findings only** (agents-as-tools — not full chain history). Include `FILES` from Reviewer handoff.
+3. **Loop 2** (`reviewer_loop_count == 2` and `debate_used == false`): Task to **debate-synthesizer** (`TARGET_AGENT: debate-synthesizer`, `DEBATE_TRIGGER: reviewer-rejection-2`, `MODEL_CLASS: thinking`). Set `debate_used: true` after debate returns. Then Task to **bug-fix** with debate brief path.
+4. **Cap** (`reviewer_loop_count >= MAX_REVIEWER_LOOPS` after debate): **user escalation** — no third auto-retry. Message includes paths to Reviewer output and `.ai/context/debates/{TASK_ID}.md` if present.
+5. Re-record workflow step on re-spawn (replaces same agent step per workflow-usage-policy).
+
+Constants: [token-rules.md](../multi-agent-system/protocol/token-rules.md) — `MAX_REVIEWER_LOOPS=2`, `MAX_DEBATE_SESSIONS_PER_TASK=1`.
 
 ### Agent slug → Task skill folder
 
-Use `TARGET_AGENT` value as `mas-{TARGET_AGENT}` (e.g. `android-dev` → `mas-android-dev`).
+Use `TARGET_AGENT` value as `mas-{TARGET_AGENT}` (e.g. `android-dev` → `mas-android-dev`, `debate-synthesizer` → `mas-debate`, `token-auditor` → `mas-token-auditor`).
 
 ### Coordinator must NOT
 
@@ -488,12 +518,23 @@ Use `TARGET_AGENT` value as `mas-{TARGET_AGENT}` (e.g. `android-dev` → `mas-an
 - Skip Task for "quick" fixes while `/mas` or `/mas-lite` is active
 - Set `run_in_background: true`
 - Chain to `NEXT_AGENT` before current Task returns
+- Paste full brief bodies in user summaries
 
 ### After Reviewer
 
-- `Approved: YES` → memory update per memory-policy.md; **daily changelog append** then **workflow usage finalize** (when qualified); ask user about Commit
-- `Approved: NO` or `Issue Resolved: NO` → Task to **bug-fix** or **dev** with Reviewer findings (session kept; re-record replaces step for same agent)
+- `Approved: YES` → memory update per memory-policy.md; **daily changelog append** then **workflow usage finalize** (when qualified); optional **token-auditor** (full `/mas`); ask user about Commit
+- `Approved: NO` or `Issue Resolved: NO` → Reviewer rejection loop above (not simple bug-fix only)
 - Workflow cancelled / user abort → `cancel-workflow-session.ps1`
+
+### Optional token auditor (post-finalize)
+
+After `finalize-workflow-usage.ps1` when `Approved: YES` and `FILES` non-empty:
+
+- **Full `/mas`:** opt-in spawn or heuristic when `tokens=unknown` on 3+ session steps
+- **Lite:** skip by default unless user requests
+- **Skip:** planning-only chains (no finalize)
+
+Spawn `token-auditor` (`MODEL_CLASS: fast`) with `BRIEF_PATH: .ai/context/workflow-sessions/{TASK_ID}.json`. Output: `.ai/context/audits/{TASK_ID}.md`. **Never blocks** workflow.
 
 ### Daily Changelog Append (after `Approved: YES`)
 

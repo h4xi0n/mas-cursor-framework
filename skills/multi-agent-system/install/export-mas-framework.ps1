@@ -37,12 +37,43 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+function Test-InstallParity {
+    param([string]$CanonicalInstallDir)
+    $frameworkRoot = (Resolve-Path (Join-Path $CanonicalInstallDir "../../..")).Path
+    $rootInstall = Join-Path $frameworkRoot "install"
+    if (-not (Test-Path $rootInstall)) { return }
+
+    $compareFiles = @(
+        "install-mas-framework.ps1",
+        "install-mas-framework.sh",
+        "install.bat",
+        "manifest.json",
+        "export-mas-framework.ps1"
+    )
+
+    foreach ($file in $compareFiles) {
+        $canonical = Join-Path $CanonicalInstallDir $file
+        $root = Join-Path $rootInstall $file
+        if (Test-Path $root) {
+            if (-not (Test-Path $canonical)) {
+                throw "Test-InstallParity FAIL: repo install/$file exists but missing in canonical skills/multi-agent-system/install/. Remove root copy or edit canonical only."
+            }
+            $hCanonical = (Get-FileHash -Path $canonical -Algorithm SHA256).Hash
+            $hRoot = (Get-FileHash -Path $root -Algorithm SHA256).Hash
+            if ($hCanonical -ne $hRoot) {
+                throw "Test-InstallParity FAIL: install/$file differs from skills/multi-agent-system/install/$file. Edit canonical path only; root install/ is export-generated or pointer-only."
+            }
+        }
+    }
+}
+
 if ([string]::IsNullOrWhiteSpace($SourceCursorHome)) {
     $SourceCursorHome = Join-Path $env:USERPROFILE ".cursor"
 }
 $SourceCursorHome = (Resolve-Path $SourceCursorHome).Path
 
 $InstallDir = $PSScriptRoot
+Test-InstallParity -CanonicalInstallDir $InstallDir
 $ManifestPath = Join-Path $InstallDir "manifest.json"
 if (-not (Test-Path $ManifestPath)) {
     throw "manifest.json not found beside this script."
@@ -74,7 +105,6 @@ function Copy-Rel {
     return $true
 }
 
-# Normalize -OutputDir: use path as-is when it already ends with mas-cursor-framework.
 function Resolve-BundleOutputDir {
     param([string]$Dir)
     $resolved = [System.IO.Path]::GetFullPath($Dir)
@@ -140,7 +170,6 @@ $hooksTemplate = @{
 }
 $hooksTemplate | ConvertTo-Json -Depth 6 | Set-Content (Join-Path $bundleRoot "hooks.mas.template.json") -Encoding UTF8
 
-# Export modes: OutputDir only -> folder; no OutputDir -> zip; both -> folder + zip.
 $wantFolderExport = -not [string]::IsNullOrWhiteSpace($OutputDir)
 $wantZipExport = [string]::IsNullOrWhiteSpace($OutputDir) -or -not [string]::IsNullOrWhiteSpace($OutputPath)
 

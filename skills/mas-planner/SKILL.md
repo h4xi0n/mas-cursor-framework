@@ -30,6 +30,7 @@ Spawned by Coordinator via **Task** (`generalPurpose`, foreground). Read [subage
 4. If `.ai/context/osint/{TASK_ID}.md` exists — read after handoff (see **OSINT Brief** below).
 5. If handoff references `.ai/context/specs/{TASK_ID}.md` — read it; base plan on acceptance criteria and API summary.
 6. For Android tasks: skim [android-veteran-standards.md](../multi-agent-system/references/android-veteran-standards.md) and [build-test-visual-qa.md](../multi-agent-system/references/build-test-visual-qa.md).
+7. When writing plan brief to `.ai/context/plans/{TASK_ID}.md`, include sections per [brief-schemas.md](../multi-agent-system/protocol/brief-schemas.md) plan type.
 
 ## OSINT Brief
 

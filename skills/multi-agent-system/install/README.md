@@ -98,7 +98,7 @@ Or copy `.ai/context/` templates manually from `templates/` (see init script).
 
 | Target | Contents |
 |--------|----------|
-| `~/.cursor/skills/` | `multi-agent-system`, `mas`, `mas-coordinator`, `mas-planner`, `mas-architect`, `mas-android-dev`, `mas-general-dev`, `mas-bug-fix`, `mas-reviewer`, `mas-documenter`, `mas-spec-reader`, `mas-commit`, `mas-lite` |
+| `~/.cursor/skills/` | `multi-agent-system`, `mas`, `mas-coordinator`, `mas-planner`, `mas-architect`, `mas-android-dev`, `mas-general-dev`, `mas-bug-fix`, `mas-reviewer`, `mas-documenter`, `mas-spec-reader`, `mas-commit`, `mas-lite`, `mas-debate`, `mas-token-auditor` |
 | `~/.cursor/commands/` | `mas.md`, `mas-lite.md` |
 | `~/.cursor/rules/` | `multi-agent-hybrid.mdc` |
 | `~/.cursor/hooks/` | `mas-session-context.ps1` (+ `.sh` on Mac) |
@@ -138,6 +138,8 @@ skills/mas-documenter/
 skills/mas-spec-reader/
 skills/mas-commit/
 skills/mas-lite/
+skills/mas-debate/
+skills/mas-token-auditor/
 commands/mas.md
 commands/mas-lite.md
 rules/multi-agent-hybrid.mdc
