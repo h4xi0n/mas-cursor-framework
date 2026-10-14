@@ -44,6 +44,15 @@ Coordinator **must** delegate every specialist step to Cursor's **Task** tool. N
 | commit | `~/.cursor/skills/mas-commit/SKILL.md` |
 | debate-synthesizer | `~/.cursor/skills/mas-debate/SKILL.md` |
 | token-auditor | `~/.cursor/skills/mas-token-auditor/SKILL.md` |
+| security-auditor | `~/.cursor/skills/mas-security-auditor/SKILL.md` |
+| dependency-risk | `~/.cursor/skills/mas-dependency-risk/SKILL.md` |
+| api-contract | `~/.cursor/skills/mas-api-contract/SKILL.md` |
+| test-executor | `~/.cursor/skills/mas-test-executor/SKILL.md` |
+| a11y | `~/.cursor/skills/mas-a11y/SKILL.md` |
+| i18n | `~/.cursor/skills/mas-i18n/SKILL.md` |
+| compliance | `~/.cursor/skills/mas-compliance/SKILL.md` |
+| mas-figma | `~/.cursor/skills/mas-figma/SKILL.md` |
+| mas-visual-fidelity | `~/.cursor/skills/mas-visual-fidelity/SKILL.md` |
 
 ## Coordinator spawn sequence
 

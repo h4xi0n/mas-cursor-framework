@@ -1,0 +1,21 @@
+﻿{
+    "task_id":  "MAS-01-test",
+    "mode":  "FULL",
+    "tier":  "none",
+    "type":  "feature",
+    "started_at":  "2026-07-27T14:23:01.7717668+05:30",
+    "reviewer_loop_count":  0,
+    "debate_used":  false,
+    "debate_round":  0,
+    "steps":  [
+                  {
+                      "agent":  "osint",
+                      "model":  "composer-2.5-fast",
+                      "model_class":  "fast",
+                      "tokens_in":  null,
+                      "tokens_out":  null,
+                      "tokens_source":  "unknown",
+                      "spawn_index":  1
+                  }
+              ]
+}

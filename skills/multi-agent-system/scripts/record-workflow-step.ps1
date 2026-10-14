@@ -23,7 +23,10 @@ param(
     [ValidateSet("task_metadata", "usage_report", "unknown", "estimate", "")]
     [string]$TokensSource = "",
 
-    [double]$DurationSec = -1
+    [double]$DurationSec = -1,
+
+    [string]$LogCapturePath = "",
+    [int]$LineCount = -1
 )
 
 $ErrorActionPreference = "Stop"
@@ -90,6 +93,15 @@ $step = [ordered]@{
 
 if ($DurationSec -ge 0) {
     $step.duration_sec = $DurationSec
+}
+
+if (-not [string]::IsNullOrWhiteSpace($LogCapturePath)) {
+    $step.log_capture_path = $LogCapturePath.Trim()
+    $session | Add-Member -NotePropertyName log_capture_path -NotePropertyValue $LogCapturePath.Trim() -Force
+}
+
+if ($LineCount -ge 0) {
+    $step.line_count = $LineCount
 }
 
 if ($replaceIndex -ge 0) {

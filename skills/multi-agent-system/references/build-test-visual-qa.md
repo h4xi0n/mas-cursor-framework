@@ -49,13 +49,27 @@ For Compose UI changes on critical screens (when tests exist):
 ./gradlew :<module>:connectedDebugAndroidTest
 ```
 
+**Device prep gate (MAS-07 v1.5.0):** Before any `connected*AndroidTest`, tier-3 `adb exec-out screencap`, or Maestro command, test-executor **Step 0** must run `android-device-prep.{ps1|sh}` and obtain PASS. Export `ANDROID_SERIAL` for Gradle/adb. Prep FAIL → skip device commands (avoid misleading AGP "no devices" traces). Enrollment: [device-prep-automation.md](device-prep-automation.md). test-run **Device** section records prep evidence for reviewer 0d-ext.
+
 Only skip tests with explicit reason: `NOT_RUN — no tests exist for changed surface; recommend adding`.
 
 Test failure → **blocks approval** unless handoff explicitly accepts debt with reason.
 
 ## Visual QA (Imagined — mandatory for UI work)
 
-Reviewer and Android Dev **mentally render** the UI as a user would see it. No screenshot tool required — imagine from Compose tree, modifiers, theme, and similar screens.
+Reviewer and Android Dev **mentally render** the UI as a user would see it when no design-spec artifact exists. When design-spec exists, artifact-backed rules below apply.
+
+### Artifact-backed Visual QA (MAS-06 — when design-spec exists)
+
+| Condition | Visual QA behavior |
+|-----------|-------------------|
+| No design-spec | Imagined checklist (unchanged — below) |
+| design-spec exists, **no** visual-qa brief | Layout/Typography/Color/Spacing imagined rows → **N/A** (cannot PASS on imagination) |
+| visual-qa brief exists | P0/P1 sourced from brief at reviewer step **0k**; P2 polish rows remain imagined |
+
+Reviewer **0k** consumes `.ai/context/visual-qa/{TASK_ID}.md` only — does not re-call Figma MCP or re-capture. Unresolved P0 `blocker` rows → `Approved: NO`. P1 PARTIAL → PASS with Major note on regions.
+
+Standards: [visual-fidelity-standards.md](visual-fidelity-standards.md)
 
 ### When Visual QA applies
 
@@ -98,8 +112,9 @@ Use **PASS / FAIL / N/A** per row. Any **FAIL** on layout, states, or consistenc
 |-------|-------|-------|-----------|
 | **Android Dev** | Run compile on touched modules before DONE | Add + run unit tests for new logic | Document expected look in Responsive/Visual Notes |
 | **Bug Fix** | Compile after patch | Run failing test + related suite | Re-imagine repro UI path after fix |
-| **Reviewer** | Mandatory compile/assemble | Mandatory targeted or module tests | Mandatory imagined walkthrough for UI changes |
+| **Reviewer** | Mandatory compile/assemble | Mandatory targeted or module tests | Mandatory imagined walkthrough for UI changes; **0k artifact-backed** when design-spec + visual-qa exist |
 | **Planner** | Task: verify build in review phase | Task: test plan listed | Task: visual QA scenarios listed |
+| **mas-visual-fidelity** | N/A (read-only) | N/A | P0 measurement + P1 screenshot compare → visual-qa brief; connected-device PNG from `capture-connected-device.{ps1\|sh}` is valid Implementation Capture source |
 
 ## Approval Blockers
 
@@ -108,3 +123,4 @@ Reviewer `Approved: YES` requires:
 - Build: **PASS** (or NOT_RUN with valid reason for docs-only change)
 - Tests: **PASS** (or NOT_RUN with explicit gap noted as Major if logic changed)
 - Visual QA: **PASS** on all non-N/A rows (or N/A for non-UI handoffs)
+- **Design fidelity (0k):** when design-spec exists for Figma-driven UI — `visual-qa` brief required; Implementation Capture paths non-empty (`paparazzi`, `compose-preview`, or `connected-device`); no unresolved P0 `blocker` rows

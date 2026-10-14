@@ -1,0 +1,57 @@
+﻿{
+    "task_id":  "MAS-08",
+    "mode":  "FULL",
+    "tier":  "none",
+    "type":  "feature",
+    "started_at":  "2026-10-02T19:57:45.8326659+05:30",
+    "reviewer_loop_count":  0,
+    "debate_used":  false,
+    "debate_round":  0,
+    "steps":  [
+                  {
+                      "agent":  "osint",
+                      "model":  "inherit",
+                      "model_class":  "thinking",
+                      "tokens_in":  null,
+                      "tokens_out":  null,
+                      "tokens_source":  "unknown",
+                      "spawn_index":  1
+                  },
+                  {
+                      "agent":  "brainstorm",
+                      "model":  "default",
+                      "model_class":  "thinking",
+                      "tokens_in":  null,
+                      "tokens_out":  null,
+                      "tokens_source":  "unknown",
+                      "spawn_index":  2
+                  },
+                  {
+                      "agent":  "planner",
+                      "model":  "default",
+                      "model_class":  "normal",
+                      "tokens_in":  null,
+                      "tokens_out":  null,
+                      "tokens_source":  "unknown",
+                      "spawn_index":  3
+                  },
+                  {
+                      "agent":  "architect",
+                      "model":  "default",
+                      "model_class":  "thinking",
+                      "tokens_in":  null,
+                      "tokens_out":  null,
+                      "tokens_source":  "unknown",
+                      "spawn_index":  4
+                  },
+                  {
+                      "agent":  "reviewer",
+                      "model":  "default",
+                      "model_class":  "thinking",
+                      "tokens_in":  null,
+                      "tokens_out":  null,
+                      "tokens_source":  "unknown",
+                      "spawn_index":  5
+                  }
+              ]
+}

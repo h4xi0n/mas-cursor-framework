@@ -24,6 +24,16 @@ Read [test-strategy-standards.md](../multi-agent-system/references/test-strategy
 - Spawn Task subagents or route to other agents
 - Replace Planner acceptance criteria or Reviewer test execution
 - Replace Dev — feed Dev via test strategy brief
+- Replace **test-executor** — test-strategy plans **before** dev; test-executor executes **after** dev (MAS-04)
+
+## Chain position (MAS-04)
+
+| Agent | When | Output |
+|-------|------|--------|
+| **test-strategy** (this agent) | Pre-dev — after planner/architect | `.ai/context/test-strategies/{TASK_ID}.md` |
+| **test-executor** | Post-dev — before documenter/reviewer | `.ai/context/test-runs/{TASK_ID}.md` |
+
+Coordinator inserts test-strategy before dev; test-executor after dev when predicates match. Reviewer consumes test-run evidence (step 0d-ext) — test-strategy never runs shell commands.
 
 ## Subagent execution
 
@@ -34,9 +44,24 @@ Spawned by Coordinator via **Task** (`generalPurpose`, foreground). Read [subage
 1. Read handoff at `.ai/handoffs/{TASK_ID}.md` — note `FEATURE`, `SCOPE`, `TEST_SURFACE`, `FILES`, `PLAN_PATH`, `STRATEGY_ONLY`.
 2. Read `.ai/context/memory.md`.
 3. Read `.ai/context/daily-changelog.md` when present (regression context).
-4. Read [test-strategy-standards.md](../multi-agent-system/references/test-strategy-standards.md).
+4. Read [test-strategy-standards.md](../multi-agent-system/references/test-strategy-standards.md) including **Device Prerequisites** template.
 5. Read optional `PLAN_PATH` (plan or brainstorm brief) for high-level surfaces only.
 6. Read **only** files listed in handoff `FILES` — do not broad-scan the repo.
+7. When `.ai/context/design-specs/{TASK_ID}.md` exists — read **Verification Contract** slice; align **Recommended Commands** with Capture Recipe (Paparazzi `verifyPaparazziDebug`, Compose Preview `validateDebugScreenshotTest`, connected-device `capture-connected-device.{ps1|sh}`). Test-strategy plans capture commands consumed by mas-visual-fidelity — does not replace fidelity specialist.
+8. When device commands planned, read [device-prep-automation.md](../multi-agent-system/references/device-prep-automation.md) slice (prerequisites + skip rules). Honor handoff `DEVICE_SERIAL` / `DEVICE_POLICY`.
+
+## Connected Device Capture (MAS-07)
+
+When design-spec Capture Recipe includes `connected-device` or handoff `DEVICE_CAPTURE: yes`, brief must include **Connected Device Capture** subsection:
+
+| Item | Content |
+|------|---------|
+| Launch Recipe | Populate `package`, `deeplink-uri` or `activity`, `post-launch-wait-ms` |
+| Device Target | `adb-serial` when multi-device; `form-factor`, `orientation` |
+| Pre-Capture | Optional `fontScale`, `uiMode`, `crop-rect` |
+| Script command | `capture-connected-device.{ps1\|sh}` with flags from contract |
+| Pre-install | `./gradlew :app:installDebug` — test-executor or dev responsibility |
+| When to recommend | Tier 3 when Paparazzi/Preview unavailable, integration parity needed, or `DEVICE_CAPTURE: yes` override |
 
 ## Handoff Context
 
@@ -60,6 +85,8 @@ Typical handoff fields:
 6. Check daily changelog for same-day regression risks.
 7. Flag flaky-test risks and recommend mitigations (not full patches).
 8. List **Recommended Commands** aligned with stack (Gradle vs npm/pytest).
+8.5. Emit **Device Prerequisites** table when any Recommended Command touches adb, connected instrumentation, screencap, or Maestro — per [test-strategy-standards.md](../multi-agent-system/references/test-strategy-standards.md). Default `DEVICE_POLICY: physical` when `TEST_SURFACE: ui`, connected commands, or `VISUAL_FIDELITY`; else `auto`. Mandatory skip rationale when `Prep gate: skip`.
+8.6. Emit **Device Logs Prerequisites** when handoff `LOG_CAPTURE: yes` or repro/bug surface — per [device-log-capture.md](../multi-agent-system/references/device-log-capture.md). Honor `LOG_PACKAGE` / `LOG_TAG` from handoff.
 9. Write brief file (create `test-strategies/` directory if missing); return output template.
 
 ## Output
@@ -116,6 +143,14 @@ DONE
 | Risk | Surface | Mitigation |
 |------|---------|------------|
 | ... | ... | ... |
+
+## Device Prerequisites
+
+<table when device commands planned — Enrollment, Target, Prep gate, DEVICE_SERIAL, DEVICE_POLICY, Package, Permissions, adb reverse, Skip rationale>
+
+## Device Logs Prerequisites
+
+<table when LOG_CAPTURE: yes — Log capture gate, Tag namespace, Package, Buffers, Format, Clear before repro, Skip rationale>
 
 ## Recommended Commands
 

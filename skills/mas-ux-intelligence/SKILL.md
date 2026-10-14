@@ -19,6 +19,21 @@ Read [ux-intelligence-standards.md](../multi-agent-system/references/ux-intellig
 - Write structured brief to `.ai/context/ux-reviews/{TASK_ID}.md`
 - Surface changelog regression hints when UX regression suspected
 
+## Mutual exclusion vs a11y and i18n
+
+**Boundary (MAS-04 Phase B):** ux-intelligence owns **behavioral friction only** — journey simulation, confusing flows, task-completion struggle.
+
+| Topic | Route to |
+|-------|----------|
+| WCAG 2.2 AA, ARIA, keyboard, screen-reader, contrast (code-verifiable) | **a11y** — not ux-intelligence |
+| ICU, locale tags, RTL, pluralization, string extraction | **i18n** — not ux-intelligence |
+
+Do **not** include WCAG criterion tables or locale/string architecture audits in ux-reviews brief. Coordinator spawns a11y/i18n when predicates match after ux-intelligence (sequential).
+
+**Boundary vs mas-figma (MAS-05):** mas-figma = pre-dev layout/token extraction from Figma; ux-intelligence = post-dev behavioral friction — no same-hop overlap. Skip mas-figma when only friction audit on existing UI.
+
+**Boundary vs mas-visual-fidelity (MAS-06):** mas-visual-fidelity = objective layout/token parity (runs **before** ux when P0-6 fires); ux-intelligence = behavioral friction only — no layout/token re-measurement.
+
 ## Never
 
 - Patch or edit production source code

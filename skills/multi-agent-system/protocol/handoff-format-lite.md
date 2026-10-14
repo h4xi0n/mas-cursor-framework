@@ -6,7 +6,7 @@ Max **12 lines**. Write to `.ai/handoffs/{TASK_ID}.md` only — never paste in c
 TASK_ID: <id>
 MODE: LITE
 TIER: S|M|L|L+
-TARGET_AGENT: <osint|imaginer|perf-optimizer|release-readiness|test-strategy|bug-fix|android-dev|general-dev|ux-intelligence|brainstorm|planner|reviewer|debate-synthesizer|token-auditor>
+TARGET_AGENT: <osint|imaginer|perf-optimizer|release-readiness|test-strategy|security-auditor|dependency-risk|api-contract|test-executor|mas-figma|bug-fix|android-dev|general-dev|ux-intelligence|brainstorm|planner|reviewer|debate-synthesizer|token-auditor>
 SPAWN_STATUS: spawned
 MC: fast|normal|thinking          # optional; lite MODEL_CLASS — see spawn-model-policy.md
 BP: .ai/context/osint/{TASK_ID}.md # optional BRIEF_PATH
@@ -32,6 +32,23 @@ DONE
 | `BRIEF_PATH:` | `BP:` | `BP: .ai/context/osint/MAS-01.md` |
 | `SECTIONS:` | `SEC:` | `SEC: Recommended, Logic Flow` |
 | `DEBATE_TRIGGER:` | `DT:` | `DT: reviewer-rejection-2` |
+| `SECURITY_AUDIT:` | `SEC:` | `SEC:y` (routing flag — see disambiguation below) |
+| `API_CONTRACT:` | `API:` | `API:y` |
+| `SUPPLY_CHAIN:` | `DEPS:` | `DEPS:y` |
+| `RUN_TESTS:` | `TEST:` | `TEST:y` |
+| `A11Y_AUDIT:` | `A11Y:` | `A11Y:y` |
+| `I18N_AUDIT:` | `I18N:` | `I18N:y` |
+| `FIGMA_SPEC:` | `FIG:` | `FIG:y` |
+| `VISUAL_FIDELITY:` | `VFID:` | `VFID:y` |
+| `DEVICE_SERIAL:` | `DEV_SER:` | `DEV_SER:R58M90ABCDE` |
+| `DEVICE_POLICY:` | `DEV_POL:` | `DEV_POL:physical` |
+| `LOG_CAPTURE:` | `LOG:` | `LOG:y` |
+
+**`SEC:` disambiguation (12-line cap):** `SEC:y` or `SEC:n` → `SECURITY_AUDIT` routing flag. `SEC: Heading1, Heading2` (comma-separated headings) → `SECTIONS:` slice per [brief-schemas.md](brief-schemas.md). Do not combine both on one line.
+
+**Compliance:** `COMPLIANCE_FRAMEWORK` — **full `/mas` only** (no lite abbreviation). Enterprise opt-in; never spawn in lite.
+
+**MAS-06 (v1.4.0):** `VFID:y` — explicit mas-visual-fidelity trigger only (no auto predicate in lite). When design-spec exists without `VFID:y`, skip spawn + warn "Figma fidelity unverified". L/L+ within tier cap only.
 
 Drop `CONTEXT` bullets in favor of `BP:` when brief exists. Max **12 lines** total.
 

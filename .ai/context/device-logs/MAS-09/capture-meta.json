@@ -1,0 +1,29 @@
+﻿{
+    "status":  "PASS",
+    "task_id":  "MAS-09",
+    "serial":  "R58M90ABCDE",
+    "package":  null,
+    "tag_filter":  "APP_TRACE",
+    "buffers":  [
+                    "main",
+                    "crash"
+                ],
+    "format":  "json",
+    "api_level":  34,
+    "pid":  null,
+    "paths":  {
+                  "main":  ".ai/context/device-logs/MAS-09/logcat-main.jsonl",
+                  "crash":  ".ai/context/device-logs/MAS-09/logcat-crash.txt",
+                  "marker":  ".ai/context/device-logs/MAS-09/repro-marker.json"
+              },
+    "line_count":  {
+                       "main":  0,
+                       "crash":  0,
+                       "total":  0
+                   },
+    "repro_started_at":  "2026-10-06T02:04:02.211Z",
+    "dumped_at":  "2026-10-06T02:06:15.495Z",
+    "warnings":  [
+                     "CAPTURE_EMPTY"
+                 ]
+}

@@ -1,6 +1,6 @@
 {
   "name": "mas-cursor-framework",
-  "version": "1.0.0",
+  "version": "1.7.0",
   "description": "Multi-Agent System for Cursor — skills, commands, rules, hooks",
   "skills": [
     "multi-agent-system",
@@ -24,11 +24,20 @@
     "mas-commit",
     "mas-lite",
     "mas-debate",
-    "mas-token-auditor"
+    "mas-token-auditor",
+    "mas-security-auditor",
+    "mas-dependency-risk",
+    "mas-api-contract",
+    "mas-test-executor",
+    "mas-a11y",
+    "mas-i18n",
+    "mas-compliance",
+    "mas-figma",
+    "mas-visual-fidelity"
   ],
   "commands": ["mas.md", "mas-lite.md"],
   "rules": ["multi-agent-hybrid.mdc"],
-  "hooks": ["mas-session-context.ps1", "mas-session-context.sh"],
+  "hooks": ["mas-session-context.ps1", "mas-session-context.sh", "capture-device-logs-hook.ps1", "capture-device-logs-hook.sh"],
   "docs": ["USER-RULE-MAS.md"],
   "hooksJson": {
     "sessionStart": "mas-session-context",

@@ -36,9 +36,16 @@ Spawned by Coordinator via **Task** (`generalPurpose`, foreground). Read [subage
 6. When handoff or prior chain indicates **perf workflow** (`TARGET_AGENT: perf-optimizer` in chain history or `CONTEXT` notes perf), read `.ai/context/optimizations/{TASK_ID}.md` when present — run **Performance Verification** (step 0b).
 7. When handoff or chain history indicates **osint workflow** (`TARGET_AGENT: osint` in chain history or `CONTEXT` notes osint), read `.ai/context/osint/{TASK_ID}.md` when present — run **OSS Alignment Verification** (step 0c).
 8. When `.ai/context/test-strategies/{TASK_ID}.md` exists — read for **Test Strategy Verification** (step 0d).
-9. When handoff notes release fix chain (`RELEASE_BRIEF`, `FAILURE_CATEGORIES`, or `CONTEXT` release workflow), read `.ai/context/release-readiness/{TASK_ID}.md` when present — run **Release Readiness Verification** (step 0e).
-10. Validate deliverable briefs against [brief-schemas.md](../multi-agent-system/protocol/brief-schemas.md) — flag missing required sections in findings.
-11. If handoff type is **post-bugfix** (contains `ORIGINAL_SYMPTOM`, `ROOT_CAUSE`, or `REPRO_STEPS`) → run **Post-Bug Fix Verification** (step 0) before general review.
+9. When `.ai/context/test-runs/{TASK_ID}.md` exists — read for **Test Run Evidence** (step 0d-ext); align with test-strategy brief.
+10. When `.ai/context/security-audits/{TASK_ID}.md` exists — run **Security Audit Verification** (step 0f).
+11. When `.ai/context/api-contracts/{TASK_ID}.md` or `.ai/context/supply-chain/{TASK_ID}.md` exists — run **Contract & Supply-Chain Verification** (step 0g).
+12. When `.ai/context/a11y-reviews/{TASK_ID}.md` or `.ai/context/i18n-reviews/{TASK_ID}.md` exists — run **A11y & I18n Verification** (step 0h).
+13. When `.ai/context/compliance/{TASK_ID}.md` exists — run **Compliance Verification** (step 0i).
+14. When `.ai/context/design-specs/{TASK_ID}.md` exists — run **Design-Spec Verification** (step 0j): verify all seven required sections per [brief-schemas.md](../multi-agent-system/protocol/brief-schemas.md); flag missing Node Map / tokens / screenshot; note reuse-table gaps and inspect-first violations (monolithic Layout Spec); do **not** re-extract.
+15. When `.ai/context/visual-qa/{TASK_ID}.md` exists — run **Design-Fidelity Verification** (step 0k): consume visual-qa brief only; no Figma MCP re-fetch or re-capture. When design-spec exists without visual-qa, Layout/Typography/Color/Spacing imagined rows → **N/A** per [build-test-visual-qa.md](../multi-agent-system/references/build-test-visual-qa.md).
+16. When handoff notes release fix chain (`RELEASE_BRIEF`, `FAILURE_CATEGORIES`, or `CONTEXT` release workflow), read `.ai/context/release-readiness/{TASK_ID}.md` when present — run **Release Readiness Verification** (step 0e).
+17. Validate deliverable briefs against [brief-schemas.md](../multi-agent-system/protocol/brief-schemas.md) — flag missing required sections in findings.
+18. If handoff type is **post-bugfix** (contains `ORIGINAL_SYMPTOM`, `ROOT_CAUSE`, or `REPRO_STEPS`) → run **Post-Bug Fix Verification** (step 0) before general review.
 
 ## Review Workflow
 
@@ -131,6 +138,56 @@ Commands run: <from brief> | NOT_RUN (<reason>)
 Verified: PASS | FAIL | N/A
 ```
 
+When `.ai/context/test-runs/{TASK_ID}.md` exists, extend step 0d:
+
+```
+## Test Run Evidence
+
+Brief: `.ai/context/test-runs/{TASK_ID}.md`
+Overall: PASS | FAIL | PARTIAL
+P0 commands: PASS | FAIL | N/A
+Aligned with strategy: YES | NO | N/A
+```
+
+### 0f. Security Audit Verification (when security-audit brief exists)
+
+**Goal: consume validated findings; Blockers advisory unless `SECURITY_BLOCKER: yes`.**
+
+1. Read `.ai/context/security-audits/{TASK_ID}.md` when present; verify Validation section exists for high-severity items.
+2. Route Blockers as **findings** — not independent merge block unless handoff `SECURITY_BLOCKER: yes`.
+3. Do not duplicate STRIDE depth — cite brief path in findings.
+
+Include in output:
+
+```
+## Security Audit Verification
+
+Brief: `.ai/context/security-audits/{TASK_ID}.md` or N/A
+Validation section present: YES | NO
+Blockers merge-blocking: YES | NO (requires SECURITY_BLOCKER: yes)
+Verified: PASS | FAIL | N/A
+```
+
+### 0g. Contract & Supply-Chain Verification (when api-contract or supply-chain brief exists)
+
+**Goal: note breaking API changes and CVE remediation in review findings.**
+
+1. Read `.ai/context/api-contracts/{TASK_ID}.md` and/or `.ai/context/supply-chain/{TASK_ID}.md` when present.
+2. Note unresolved P0 breaking changes or P0 CVE items as **Major** or **Critical** per severity.
+3. Do not re-run CVE lookup — consume brief evidence.
+
+Include in output:
+
+```
+## Contract & Supply-Chain Verification
+
+API brief: `.ai/context/api-contracts/{TASK_ID}.md` or N/A
+Supply-chain brief: `.ai/context/supply-chain/{TASK_ID}.md` or N/A
+Breaking changes noted: YES | NO | N/A
+CVE remediation noted: YES | NO | N/A
+Verified: PASS | FAIL | N/A
+```
+
 ### 0e. Release Readiness Verification (when reviewing after release fix chain)
 
 **Goal: confirm each addressed P0/P1 category from release brief shows PASS or documented residual risk.**
@@ -152,6 +209,95 @@ Release Ready: YES | NO
 ```
 
 **Reviewer loop (`Approved: NO`):** route back to **fix agent** — not `release-readiness` unless user requests full re-audit.
+
+### 0h. A11y & I18n Verification (when a11y or i18n brief exists)
+
+**Goal: note WCAG/locale gaps from specialist briefs; do not duplicate ux-intelligence friction.**
+
+1. Read `.ai/context/a11y-reviews/{TASK_ID}.md` and/or `.ai/context/i18n-reviews/{TASK_ID}.md` when present.
+2. Verify required schema sections (WCAG table; String inventory, Locale gaps, RTL, Recommendations).
+3. Note unresolved P0 items as **Major**; cite brief paths — do not re-run WCAG scanner or translation vendor checks.
+4. Do not duplicate friction findings from ux-reviews — a11y/i18n own conformance depth.
+
+Include in output when brief(s) exist:
+
+```
+## A11y & I18n Verification
+
+A11y brief: `.ai/context/a11y-reviews/{TASK_ID}.md` or N/A
+I18n brief: `.ai/context/i18n-reviews/{TASK_ID}.md` or N/A
+Schema complete: YES | NO
+P0 gaps noted: YES | NO | N/A
+Verified: PASS | FAIL | N/A
+```
+
+### 0i. Compliance Verification (when compliance brief exists)
+
+**Goal: note evidence gaps — not legal sign-off.**
+
+1. Read `.ai/context/compliance/{TASK_ID}.md` when present.
+2. Verify **Not legal advice** section exists; flag schema gap if missing → `Approved: NO`.
+3. Note unresolved P0 evidence gaps as **Major**; do not certify compliance.
+
+Include in output:
+
+```
+## Compliance Verification
+
+Brief: `.ai/context/compliance/{TASK_ID}.md` or N/A
+Not legal advice section: YES | NO
+Evidence gaps noted: YES | NO | N/A
+Legal sign-off: N/A (HITL required)
+Verified: PASS | FAIL | N/A
+```
+
+### 0j. Design-Spec Verification (when design-spec brief exists)
+
+**Goal: validate extraction schema — not re-extract or judge implementation parity.**
+
+1. Read `.ai/context/design-specs/{TASK_ID}.md` when present.
+2. Verify all seven required extraction sections per [brief-schemas.md](../multi-agent-system/protocol/brief-schemas.md); note Verification Contract slice when present.
+3. Flag missing Node Map / tokens / screenshot; note reuse-table gaps and inspect-first violations.
+4. Do **not** re-call Figma MCP or re-extract.
+
+Include in output when design-spec exists:
+
+```
+## Design-Spec Verification
+
+Brief: `.ai/context/design-specs/{TASK_ID}.md`
+Schema complete: YES | NO
+Verification Contract present: YES | NO | N/A
+Inspect-first violations: YES | NO
+Verified: PASS | FAIL | N/A
+```
+
+### 0k. Design-Fidelity Verification (when design-spec exists — consumer-only)
+
+**Goal: gate Figma-driven UI on artifact-backed fidelity — not imagined layout rows.**
+
+1. No design-spec → 0k **N/A**.
+2. design-spec exists → require `visual-qa/{TASK_ID}.md` with all six schema sections when P0-6 fired or Figma-driven UI in scope.
+3. P0 rows with `severity: blocker` unresolved → `Approved: NO` (Major minimum).
+4. Reviewer does **not** re-call Figma MCP or re-capture — consumes brief only.
+5. Implementation Capture paths must exist and be non-empty for `Approved: YES` on Figma-driven UI.
+6. P1 PARTIAL → PASS with Major note on regions.
+7. When design-spec exists **without** visual-qa brief → Layout/Typography/Color/Spacing imagined rows in step 4 → **N/A** (cannot PASS on imagination).
+
+Include in output:
+
+```
+## Design-Fidelity Verification (0k)
+
+Visual-qa brief: `.ai/context/visual-qa/{TASK_ID}.md` or N/A
+Schema complete: YES | NO | N/A
+P0 blockers unresolved: YES | NO | N/A
+Implementation Capture valid: YES | NO | N/A
+P1 result: PASS | FAIL | PARTIAL | N/A
+Verified: PASS | FAIL | N/A
+```
+
+Standards: [visual-fidelity-standards.md](../multi-agent-system/references/visual-fidelity-standards.md)
 
 ### 1. Imagine the Implementation
 
@@ -192,11 +338,11 @@ Read [build-test-visual-qa.md](../multi-agent-system/references/build-test-visua
 
 **FAIL blocks approval.** NOT_RUN only with explicit reason (e.g. markdown-only change).
 
-### 4. Visual QA (Imagined — mandatory for UI changes)
+### 4. Visual QA (Imagined — mandatory for UI changes without design-spec)
 
 Read Visual QA section in [build-test-visual-qa.md](../multi-agent-system/references/build-test-visual-qa.md).
 
-Mentally render the UI from code — do not approve UI work without this step.
+When **design-spec exists**, Layout/Typography/Color/Spacing rows → **N/A** unless `visual-qa` brief present (step 0k sources P0/P1). When no design-spec, mentally render the UI from code — do not approve UI work without this step.
 
 Imagine the screen/bottom sheet/overlay at:
 
@@ -357,6 +503,54 @@ Brief: `.ai/context/test-strategies/{TASK_ID}.md` or N/A
 P0 tests: PASS | FAIL | N/A
 Skip rationale documented: YES | NO | N/A
 Commands run: <from brief> | NOT_RUN (<reason>)
+Verified: PASS | FAIL | N/A
+
+## Test Run Evidence:
+
+<only when test-run brief exists; otherwise "N/A">
+
+Brief: `.ai/context/test-runs/{TASK_ID}.md` or N/A
+Overall: PASS | FAIL | PARTIAL
+P0 commands: PASS | FAIL | N/A
+Aligned with strategy: YES | NO | N/A
+
+## Security Audit Verification:
+
+<only when security-audit brief exists; otherwise "N/A">
+
+Brief: `.ai/context/security-audits/{TASK_ID}.md` or N/A
+Validation section present: YES | NO
+Blockers merge-blocking: YES | NO
+Verified: PASS | FAIL | N/A
+
+## Contract & Supply-Chain Verification:
+
+<only when api-contract or supply-chain brief exists; otherwise "N/A">
+
+API brief: `.ai/context/api-contracts/{TASK_ID}.md` or N/A
+Supply-chain brief: `.ai/context/supply-chain/{TASK_ID}.md` or N/A
+Breaking changes noted: YES | NO | N/A
+CVE remediation noted: YES | NO | N/A
+Verified: PASS | FAIL | N/A
+
+## A11y & I18n Verification:
+
+<only when a11y or i18n brief exists; otherwise "N/A">
+
+A11y brief: `.ai/context/a11y-reviews/{TASK_ID}.md` or N/A
+I18n brief: `.ai/context/i18n-reviews/{TASK_ID}.md` or N/A
+Schema complete: YES | NO
+P0 gaps noted: YES | NO | N/A
+Verified: PASS | FAIL | N/A
+
+## Compliance Verification:
+
+<only when compliance brief exists; otherwise "N/A">
+
+Brief: `.ai/context/compliance/{TASK_ID}.md` or N/A
+Not legal advice section: YES | NO
+Evidence gaps noted: YES | NO | N/A
+Legal sign-off: N/A (HITL required)
 Verified: PASS | FAIL | N/A
 
 ## Release Readiness Verification:

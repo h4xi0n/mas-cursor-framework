@@ -1,0 +1,65 @@
+{
+  "pass_sample": {
+    "status": "PASS",
+    "serial": "R58M90ABCDE",
+    "exit_code": "PASS",
+    "message": "Device ready; ANDROID_SERIAL=R58M90ABCDE",
+    "policy_applied": "auto",
+    "boot_wait_ms": 0,
+    "grants_applied": [],
+    "grants_skipped": [],
+    "reverse_applied": [],
+    "animations_disabled": true,
+    "warnings": []
+  },
+  "fail_unauthorized": {
+    "status": "FAIL",
+    "serial": null,
+    "exit_code": "UNAUTHORIZED",
+    "message": "Device unauthorized — unlock phone and tap Always allow on USB debugging prompt. See device-prep-automation.md enrollment checklist.",
+    "policy_applied": "auto",
+    "boot_wait_ms": null,
+    "grants_applied": [],
+    "grants_skipped": [],
+    "reverse_applied": [],
+    "animations_disabled": false,
+    "warnings": []
+  },
+  "fail_no_device": {
+    "status": "FAIL",
+    "serial": null,
+    "exit_code": "NO_DEVICE",
+    "policy_applied": "auto",
+    "boot_wait_ms": null,
+    "grants_applied": [],
+    "grants_skipped": [],
+    "reverse_applied": [],
+    "animations_disabled": false,
+    "warnings": []
+  },
+  "fail_ambiguous": {
+    "status": "FAIL",
+    "serial": null,
+    "exit_code": "AMBIGUOUS_DEVICE",
+    "policy_applied": "auto",
+    "boot_wait_ms": null,
+    "grants_applied": [],
+    "grants_skipped": [],
+    "reverse_applied": [],
+    "animations_disabled": false,
+    "warnings": []
+  },
+  "required_fields": [
+    "status",
+    "serial",
+    "exit_code",
+    "message",
+    "policy_applied",
+    "boot_wait_ms",
+    "grants_applied",
+    "grants_skipped",
+    "reverse_applied",
+    "animations_disabled",
+    "warnings"
+  ]
+}

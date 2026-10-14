@@ -35,9 +35,10 @@ Spawned by Coordinator via **Task** (`generalPurpose`, foreground). Read [subage
 3. When `.ai/context/optimizations/{TASK_ID}.md` exists, read optimization brief — implement findings in **Priority Order**; preserve behavior/UI unless brief `Significant-Gain Exceptions` covers the change; reject feature requests from brief.
 4. When `.ai/context/release-readiness/{TASK_ID}.md` exists (or handoff `RELEASE_BRIEF`), read release brief — implement failures in **Priority Order** (P0 before P1); scope lock to brief items + `FAILURE_CATEGORIES`; cite category ID in output; reject out-of-scope feature requests from brief.
 5. When `.ai/context/test-strategies/{TASK_ID}.md` exists (or handoff `TEST_STRATEGY_BRIEF`), read test strategy brief — governs test files when optimization brief also present.
-6. When `.ai/context/osint/{TASK_ID}.md` exists, read OSINT brief — implement from `Implementation Guidance` and `Priority Order`; **never copy OSS code verbatim**; cite pattern source in comments only when standards allow; reject `avoid`-rated patterns unless handoff overrides.
-7. Read context files per read-order.
-8. Detect stack from `project.md`.
+6. When `.ai/context/design-specs/{TASK_ID}.md` exists — read design-spec at startup including **Verification Contract** slice; treat extracted layout/code as **reference — not final code**; implement 1:1 vs Screenshot Reference; document capture paths (Paparazzi class, `@Preview` name, baseline PNG) in handoff `FILES` per Capture Recipe; when Capture Recipe uses `connected-device`, document **Launch Recipe** in handoff `LAUNCH:` block (see [mas-android-dev](../mas-android-dev/SKILL.md) checklist); download-and-commit assets per Asset Manifest; do **not** call Figma MCP when design-spec exists. **Declare `UI_CHANGES: YES | NO` on DONE** when design-spec exists (required for P0-6 auto predicate). Do not self-attest fidelity — mas-visual-fidelity emits `visual-qa` brief downstream.
+7. When `.ai/context/osint/{TASK_ID}.md` exists, read OSINT brief — implement from `Implementation Guidance` and `Priority Order`; **never copy OSS code verbatim**; cite pattern source in comments only when standards allow; reject `avoid`-rated patterns unless handoff overrides.
+8. Read context files per read-order.
+9. Detect stack from `project.md`.
 
 ## OSINT Brief
 
@@ -126,10 +127,21 @@ Optional `## Usage Report` before `DONE` — **full `/mas` only**; omit when `MO
 - Early returns, minimal scope diffs
 - Accessibility attributes on interactive elements
 
+## Device log ingestion (MAS-09 bug-fix pass)
+
+When handoff `BRIEF_PATH` points to `capture-meta.json` (or `.ai/context/device-logs/{TASK_ID}/capture-meta.json`):
+
+1. Read `capture-meta.json` first — paths, filters, `line_count`, `repro_started_at`
+2. Read log files on disk (not injected via hook `additional_context`)
+3. **Parse priority:** `logcat-crash.txt` → `APP_TRACE` JSON lines in main → unfiltered main buffer tail
+4. **Correlation:** Match `repro-marker.json` timestamp to first `event=repro_marker` or first app log after marker
+
+SOT: [device-log-capture.md](../multi-agent-system/references/device-log-capture.md).
+
 ## Never
 
 - Refactor unrelated code.
 - Apply Android-specific patterns to non-Android projects.
 - Add verbose inline comments — Documenter syncs in-code documentation after implementation.
 
-Coordinator routes to **UX Intelligence** next when `UI_CHANGES: YES` (`NEXT_AGENT: ux-intelligence`); to **Documenter** when `UI_CHANGES: NO` or logic-only.
+Coordinator routes to **mas-visual-fidelity** first when P0-6 fires (design-spec + `UI_CHANGES: YES`), then **UX Intelligence** (`NEXT_AGENT: ux-intelligence`); to **Documenter** when `UI_CHANGES: NO` or logic-only.

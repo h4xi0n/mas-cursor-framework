@@ -25,11 +25,22 @@ Beyond base context and handoff `BRIEF_PATH` / `SECTIONS:` slice:
 | brainstorm | `osint/{TASK_ID}.md`, `specs/{TASK_ID}.md` if exists |
 | planner | osint, brainstorms, specs for `{TASK_ID}` |
 | architect | osint, brainstorms, plans for `{TASK_ID}` |
-| general-dev / android-dev | plans, imaginations, optimizations, ux-reviews, test-strategies for `{TASK_ID}` |
+| general-dev / android-dev | plans, imaginations, optimizations, ux-reviews, test-strategies for `{TASK_ID}`; **`design-specs/{TASK_ID}.md` when present** including **Verification Contract** slice (conditional — do not call Figma MCP when brief exists) |
+| mas-figma | osint, architecture, plans for `{TASK_ID}`; handoff `SOURCES_HINT` / `FILES` (Figma URL/node-id) |
+| mas-visual-fidelity | design-specs (all sections + Verification Contract incl. Launch Recipe / Device Target when tier 3), plans for `{TASK_ID}`; dev handoff `FILES`, `LAUNCH:` block, `DEVICE_CAPTURE`, `ADB_SERIAL`; test-strategies visual capture commands slice; [scripts/README.md](../scripts/README.md) when Capture Recipe = `connected-device` |
 | bug-fix | above + `debates/{TASK_ID}.md` when `DEBATE_TRIGGER` or debate brief exists |
-| reviewer | all `{TASK_ID}` briefs in context dirs + handoff `FILES` |
+| reviewer | all `{TASK_ID}` briefs in context dirs + handoff `FILES`; **`visual-qa/{TASK_ID}.md` at step 0k** (after 0j design-spec) when design-spec exists |
 | debate-synthesizer | reviewer output, prior `debates/{TASK_ID}.md`, handoff `FILES` |
 | token-auditor | `workflow-sessions/{TASK_ID}.json` only |
+| security-auditor | osint, architecture, plans for `{TASK_ID}`; changed FILES from handoff |
+| api-contract | osint, architecture for `{TASK_ID}`; API spec files in handoff `FILES` |
+| dependency-risk | osint, plans for `{TASK_ID}`; lockfiles/manifest/skills/MCP paths in handoff `FILES` |
+| test-executor | test-strategies, plans for `{TASK_ID}`; handoff `FILES`; [device-prep-automation.md](../references/device-prep-automation.md) slice when strategy **Device Prerequisites** present; [device-log-capture.md](../references/device-log-capture.md) when `LOG_CAPTURE: yes` |
+| test-strategy | [device-prep-automation.md](../references/device-prep-automation.md) slice when device commands planned; [test-strategy-standards.md](../references/test-strategy-standards.md) Device Prerequisites + Device Logs Prerequisites templates |
+| bug-fix, general-dev | `.ai/context/device-logs/{TASK_ID}/capture-meta.json` when handoff `BRIEF_PATH` points to device logs — read meta first, then on-disk log files |
+| a11y | ux-reviews for `{TASK_ID}` if exists; plans for `{TASK_ID}`; UI FILES from handoff |
+| i18n | plans for `{TASK_ID}`; string/resource FILES from handoff |
+| compliance | osint, architecture for `{TASK_ID}`; handoff `COMPLIANCE_FRAMEWORK` value |
 
 ## `BRIEF_PATH` + `SECTIONS:` semantics
 

@@ -1,0 +1,42 @@
+{
+  "meta": {
+    "fixture": "MAS-04-B-FIX-ALL",
+    "purpose": "Synthetic string resource stub for P1-3 SCOPE / i18n dogfood",
+    "defaultLocale": "en",
+    "supportedLocales": ["en", "de"]
+  },
+  "strings": {
+    "app.title": {
+      "en": "Task Manager",
+      "de": "Aufgabenverwaltung"
+    },
+    "button.remove": {
+      "en": "Remove",
+      "de": "Entfernen"
+    },
+    "button.save": {
+      "en": "Save changes",
+      "de": "Änderungen speichern"
+    },
+    "list.empty": {
+      "en": "No items yet.",
+      "de": "Noch keine Einträge."
+    },
+    "confirm.delete.title": {
+      "en": "Delete this item?",
+      "de": "Diesen Eintrag löschen?"
+    },
+    "confirm.delete.body": {
+      "en": "This action cannot be undone.",
+      "de": "Diese Aktion kann nicht rückgängig gemacht werden."
+    },
+    "error.network": {
+      "en": "Network error. Please try again.",
+      "de": "Netzwerkfehler. Bitte erneut versuchen."
+    },
+    "plural.items": {
+      "en": "{count, plural, one {# item} other {# items}}",
+      "de": "{count, plural, one {# Eintrag} other {# Einträge}}"
+    }
+  }
+}

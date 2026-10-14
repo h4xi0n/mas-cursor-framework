@@ -33,8 +33,25 @@ Record resolved `model_class` via `record-workflow-step.ps1 -ModelClass`.
 | architect | `thinking` | `claude-opus-4-7-thinking-high` or latest thinking-high family |
 | reviewer | `thinking` | `claude-opus-4-7-thinking-high` or latest thinking-high family |
 | debate-synthesizer | `thinking` | `claude-opus-4-7-thinking-high` or latest thinking-high family |
+| security-auditor | `thinking` | `claude-opus-4-7-thinking-high` or latest thinking-high family |
+| api-contract | `normal` | default / `composer-2.5` |
+| dependency-risk | `fast` | `composer-2.5-fast` |
+| test-executor | `normal` | default / `composer-2.5` |
+| a11y | `normal` | default / `composer-2.5` |
+| i18n | `normal` | default / `composer-2.5` |
+| compliance | `thinking` | `claude-opus-4-7-thinking-high` or latest thinking-high family |
+| mas-figma | `normal` | default / `composer-2.5` |
+| mas-visual-fidelity | `normal` | default / `composer-2.5` |
 
 Lite Reviewer with `REVIEWER_MODE: lite` may use `fast` when Coordinator sets `MC: fast` on handoff.
+
+**MAS-04 P0 quartet (v1.2.0):** `security-auditor` → thinking; `api-contract` / `test-executor` → normal; `dependency-risk` → fast. Lite `MC:` overrides apply per resolution order above.
+
+**MAS-04 P1 trio (v1.2.1):** `a11y` / `i18n` → normal; `compliance` → thinking. Compliance is full `/mas` only — not lite abbreviations.
+
+**MAS-05 (v1.3.0):** `mas-figma` → `normal` (default). Escalate to `thinking` when handoff `FIGMA_COMPLEXITY: high` or Coordinator sets `MODEL_CLASS: thinking` explicitly (node count > 40, variant depth ≥ 3, or unbound values > 30% — see [figma-extraction-standards.md](../references/figma-extraction-standards.md)).
+
+**MAS-06 (v1.4.0):** `mas-visual-fidelity` → `normal` (default). Escalate to `thinking` when handoff `FIGMA_COMPLEXITY: high` or design-spec has **> 3** screen states (sectioned visual-qa brief). Lite: `VFID:y` explicit only — see [handoff-format-lite.md](handoff-format-lite.md).
 
 ## Override rules
 

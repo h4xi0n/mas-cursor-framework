@@ -11,6 +11,28 @@
 
 **Cap breach:** Coordinator escalates to user with paths to reviewer brief and `debates/{TASK_ID}.md` when applicable — no further auto-spawn.
 
+### MAX_CHAIN_AGENTS overflow — optional specialist skip order (MAS-04)
+
+When projected chain exceeds cap, drop **optional** specialists in this order (first dropped = lowest retention):
+
+```
+1. test-executor
+2. api-contract
+3. dependency-risk
+4. security-auditor
+5. a11y
+6. i18n
+7. compliance
+```
+
+Record `skipped_specialists: []` in session JSON; log in user summary. Lite L/L+ uses same order within tier cap (3–4). Phase C specialists (observability, migration, chaos-resilience) follow compliance in mas-coordinator overflow policy.
+
+**Protected agents (never auto-skipped):** osint, brainstorm, planner, architect, test-strategy, dev, android-dev, general-dev, bug-fix, documenter, reviewer, imaginer (active bug chain), debate-synthesizer (when triggered).
+
+**MAS-05 (v1.3.0):** `mas-figma` is **protected-when-triggered** in full `/mas` — not added to the auto-skip list above (dev depends on design-spec artifact). If mandatory chain + mas-figma exceeds `MAX_CHAIN_AGENTS` (12) → **user escalation**, not silent drop. In Lite, `mas-figma` is **skippable within tier cap** (S/M: no spawn; L/L+: `FIG:y` per predicate — skip + warn if cap breached; recommend full `/mas`).
+
+**MAS-06 (v1.4.0):** `mas-visual-fidelity` is **protected-when-triggered** in full `/mas` — not added to the auto-skip list above (same policy as `mas-figma`). Cap breach with triggered fidelity → **user escalation** with unresolved P0 table attached — never silent skip in full `/mas`. In Lite: no auto predicate — skip spawn unless explicit `VFID:y`; always warn "Figma fidelity unverified" when design-spec exists.
+
 ## Artifact-forward rule
 
 After each specialist step, Coordinator user summary:

@@ -1,0 +1,7 @@
+{
+  "status": "PASS",
+  "exit_code": "CAPTURE_EMPTY",
+  "message": "Dump succeeded but 0 lines captured — check tag filter or repro window",
+  "capture_meta_path": ".ai/context/device-logs/MAS-09/capture-meta.json",
+  "line_count": 0
+}

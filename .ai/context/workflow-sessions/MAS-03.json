@@ -1,0 +1,36 @@
+﻿{
+    "task_id":  "MAS-03",
+    "mode":  "FULL",
+    "tier":  "none",
+    "type":  "feature",
+    "started_at":  "2026-07-27T21:28:58.7876007+05:30",
+    "steps":  [
+                  {
+                      "agent":  "spec-reader",
+                      "model":  "default",
+                      "model_class":  "normal",
+                      "tokens_in":  null,
+                      "tokens_out":  null,
+                      "tokens_source":  "unknown",
+                      "spawn_index":  1
+                  },
+                  {
+                      "agent":  "general-dev",
+                      "model":  "default",
+                      "model_class":  "normal",
+                      "tokens_in":  null,
+                      "tokens_out":  null,
+                      "tokens_source":  "unknown",
+                      "spawn_index":  2
+                  },
+                  {
+                      "agent":  "reviewer",
+                      "model":  "default",
+                      "model_class":  "normal",
+                      "tokens_in":  null,
+                      "tokens_out":  null,
+                      "tokens_source":  "unknown",
+                      "spawn_index":  3
+                  }
+              ]
+}

@@ -25,6 +25,32 @@ Read [release-readiness-standards.md](../multi-agent-system/references/release-r
 - Spawn Task subagents or route to other agents
 - Replace Reviewer change-set validation — holistic ship gate only
 - Paste keystore passwords or secrets in brief or chat
+- Replace **dependency-risk** or **security-auditor** depth audits — release-readiness remains category PASS/FAIL sweep
+
+## Optional specialist pre-pass (MAS-04)
+
+Before or alongside release-readiness, Coordinator **may** spawn (when handoff flags or predicates match):
+
+| Flag / predicate | Specialist | Notes |
+|------------------|------------|-------|
+| `SUPPLY_CHAIN: yes` or lockfile/manifest in FILES | dependency-risk | Depth CVE/blast-radius — does not replace Dependencies category |
+| `SECURITY_AUDIT: yes` or auth/crypto in SCOPE | security-auditor | STRIDE/OWASP depth — does not replace Security category PASS/FAIL |
+| `COMPLIANCE_FRAMEWORK` set | compliance | Framework evidence depth — does not replace Compliance category PASS/FAIL sweep |
+
+Specialists produce advisory briefs only. **Release gate topology unchanged** — category FAIL still routes to fix agents per standards.
+
+### Category FAIL → specialist routing (Phase B)
+
+When release-readiness reports P0/P1 FAIL, Coordinator routes depth work to specialists — **release-readiness does not re-audit** WCAG tables or locale depth inline:
+
+| Category FAIL | Coordinator routes to | Notes |
+|---------------|----------------------|-------|
+| Accessibility | **a11y** | WCAG 2.2 criterion table in `a11y-reviews/{TASK_ID}.md` |
+| Localization | **i18n** | String/locale audit in `i18n-reviews/{TASK_ID}.md` |
+| Compliance (regulatory evidence) | **compliance** when `COMPLIANCE_FRAMEWORK` set | Else `android-dev` / `general-dev` per standards |
+| Other P0/P1 categories | `bug-fix` / `android-dev` / `general-dev` | Unchanged |
+
+Re-run release-readiness after specialist briefs and dev fixes. FAIL categories still route to dev/bug-fix for implementation — specialists audit only.
 
 ## Subagent execution
 

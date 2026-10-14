@@ -163,8 +163,14 @@ if (-not $SkipHooks) {
         }
     }
 
+    $hookCmdLogStop = 'powershell -NoProfile -ExecutionPolicy Bypass -File ./hooks/capture-device-logs-hook.ps1 stop'
+    $hookCmdLogBefore = 'powershell -NoProfile -ExecutionPolicy Bypass -File ./hooks/capture-device-logs-hook.ps1 beforeSubmitPrompt'
+    $hookCmdLogAfterShell = 'powershell -NoProfile -ExecutionPolicy Bypass -File ./hooks/capture-device-logs-hook.ps1 afterShellExecution'
+
     Add-HookIfMissing -EventName "sessionStart" -Command $hookCmdSession
     Add-HookIfMissing -EventName "subagentStop" -Command $hookCmdSubagent
+    Add-HookIfMissing -EventName "stop" -Command $hookCmdLogStop
+    Add-HookIfMissing -EventName "afterShellExecution" -Command $hookCmdLogAfterShell
 
     $out = @{ version = 1; hooks = $hooksObj }
     $out | ConvertTo-Json -Depth 8 | Set-Content $hooksJsonPath -Encoding UTF8

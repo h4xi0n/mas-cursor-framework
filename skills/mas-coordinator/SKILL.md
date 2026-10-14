@@ -133,6 +133,67 @@ Route to **Architect** when:
 - New module design
 - Refactor planning
 
+## MAS-05 — P0-5 mas-figma (design-spec feeder)
+
+Zero-token routing — evaluate **before the dev slot** (after architect/planner). **First match wins**; max **one `mas-figma` spawn per `TASK_ID`** unless handoff `RE_EXTRACT: yes`. Track in session JSON `specialists_spawned: []`.
+
+| Priority | Predicate (any true) | Specialist | Default chain position |
+|----------|----------------------|------------|------------------------|
+| P0-5 | `FIGMA_SPEC: yes` OR Figma URL/`node-id` in `SOURCES_HINT`/`FILES` OR `SCOPE: ui-from-figma` | mas-figma | After architect/planner; **before** android-dev/general-dev |
+
+**Suppression rule:** Skip mas-figma when UI already exists and only behavioral friction (→ ux-intelligence) or WCAG (→ a11y) is in scope — trigger is *implementation-from-design*, not audit-of-existing-UI.
+
+**UI-from-Figma chain:**
+
+`coordinator → osint → brainstorm → planner → architect → [mas-figma?] → android-dev|general-dev → [ux-intelligence → a11y → i18n per P1] → documenter → reviewer`
+
+**Ordering invariants:**
+
+1. mas-figma always **after** architect/planner; **before** dev when triggered.
+2. mas-figma **never** on same hop as ux-intelligence or a11y (pre-dev vs post-dev).
+3. mas-figma is **protected-when-triggered** in full `/mas` — if cap breach, user escalation (not silent skip). Lite: skippable within tier cap (`FIG:y` on L/L+ only).
+
+Route to **mas-figma** when predicate P0-5 matches. Handoff: `TARGET_AGENT: mas-figma`, `MODEL_CLASS: normal` (or `thinking` when `FIGMA_COMPLEXITY: high`), `SOURCES_HINT`, upstream `BRIEF_PATH` refs, `DELIVERABLE: Brief at .ai/context/design-specs/{TASK_ID}.md`, `NEXT_AGENT: android-dev|general-dev`.
+
+## MAS-06 — P0-6 mas-visual-fidelity (post-dev fidelity gate)
+
+Zero-token routing — evaluate **after the dev slot**, **before ux-intelligence**. **First match wins**; max **one `mas-visual-fidelity` spawn per `TASK_ID`** unless handoff `RE_VERIFY: yes`. Track in session JSON `specialists_spawned: []`, `visual_fidelity_spawned`, `p0_blockers`, `iteration_count`.
+
+| Priority | Predicate (any true) | Specialist | Default chain position |
+|----------|----------------------|------------|------------------------|
+| P0-6 | `VISUAL_FIDELITY: yes` OR (`VISUAL_FIDELITY: auto` AND `.ai/context/design-specs/{TASK_ID}.md` exists AND dev handoff `UI_CHANGES: YES` [or `FILES` touch Composables/resources/themes/dimensions]) | mas-visual-fidelity | After android-dev/general-dev; **before** ux-intelligence |
+
+**Suppression rules:**
+
+1. Skip when `UI_CHANGES: NO` — even if design-spec exists.
+2. Skip when no `design-specs/{TASK_ID}.md`.
+3. Skip when only behavioral friction or WCAG on **existing** UI with no new implementation from spec.
+4. Lite: **no auto predicate** — skip spawn unless explicit `VFID:y`; always warn "Figma fidelity unverified".
+
+**UI-from-Figma chain (updated):**
+
+`coordinator → … → [mas-figma?] → android-dev|general-dev → [mas-visual-fidelity?] → ux-intelligence → a11y → i18n → … → test-executor → documenter → reviewer`
+
+**Ordering invariants:**
+
+1. mas-visual-fidelity always **after** dev; **before** ux-intelligence/a11y/i18n when triggered.
+2. mas-visual-fidelity always **after** mas-figma when both fire (pre-dev extraction before post-dev verify).
+3. Max one spawn per `TASK_ID` unless `RE_VERIFY: yes`.
+4. P0 `blocker` rows → dev fix (max **2** iterations) → `RE_VERIFY: yes` re-spawn → user escalation with P0 table if still failing.
+5. Reviewer **never** runs before visual-fidelity when P0-6 fired and iteration incomplete.
+6. mas-visual-fidelity is **protected-when-triggered** in full `/mas` — cap breach → user escalation (not silent skip). Lite: `VFID:y` within cap or skip + warn.
+
+Route to **mas-visual-fidelity** when predicate P0-6 matches. Handoff: `TARGET_AGENT: mas-visual-fidelity`, `MODEL_CLASS: normal` (or `thinking` when `FIGMA_COMPLEXITY: high` or > 3 screens), upstream design-spec `BRIEF_PATH`, dev `FILES`, `DELIVERABLE: Brief at .ai/context/visual-qa/{TASK_ID}.md`, `NEXT_AGENT: ux-intelligence|test-executor` (per chain). Forward `DEVICE_CAPTURE: yes` and `ADB_SERIAL` when present on user handoff or dev DONE.
+
+## MAS-07 — connected-device capture flags
+
+| Flag | Effect |
+|------|--------|
+| `DEVICE_CAPTURE: yes` | Force tier-3 adb capture even when Paparazzi/Preview available |
+| `ADB_SERIAL: {serial}` | Multi-device override — passed to mas-visual-fidelity handoff |
+
+Dev `LAUNCH:` block (package, deeplink-uri or activity) forwarded when Capture Recipe uses `connected-device`.
+
 Route to **Android Dev** when:
 
 - Implementation required AND project is Android (see `project.md` or `build.gradle.kts`)
@@ -237,7 +298,10 @@ Release Readiness handoff must include:
 | `RELEASE_ONLY: true` | `none` |
 | All categories PASS or only P2 FAIL (no P0/P1 FAIL) | `none` (or `commit` when user already confirmed ship — never auto) |
 | Top P0 is Crashes, ANRs (functional), or Edge cases (functional) | `bug-fix` |
-| Top P0/P1 is Android-specific (lint, a11y, Play, signing, ProGuard, etc.) | `android-dev` |
+| Top P0/P1 is **Accessibility** | `a11y` (depth WCAG — release-readiness does not re-audit) |
+| Top P0/P1 is **Localization** | `i18n` (locale/string depth — release-readiness does not duplicate) |
+| Top P0/P1 is **Compliance** (regulatory evidence) | `compliance` when `COMPLIANCE_FRAMEWORK` set; else `general-dev` / `android-dev` |
+| Top P0/P1 is Android-specific (lint, Play, signing, ProGuard, etc.) | `android-dev` |
 | Non-Android stack or generic lint/versioning | `general-dev` |
 
 Coordinator picks **single** primary fix agent from highest-severity P0; split only on user request.
@@ -274,6 +338,75 @@ Test Strategy handoff must include:
 
 Skip Test Strategy only for: trivial one-file/obvious fix, config-only, docs-only, user says skip, or planning-only with no dev next.
 
+## MAS-04 Phase A — P0 audit specialists (deterministic predicates)
+
+Zero-token routing — evaluate predicates before each specialist slot. **First match wins per slug**; max **one spawn per specialist per `TASK_ID`** unless handoff `RE_AUDIT: yes`. Track spawned slugs in session JSON `specialists_spawned: []`.
+
+| Priority | Predicate (any true) | Specialist | Default chain position |
+|----------|------------------------|------------|------------------------|
+| P0-1 | `SUPPLY_CHAIN: yes` OR lockfile/manifest/MCP/skills/hooks delta in `FILES` OR `SCOPE: supply-chain` | dependency-risk | Early: after osint, before planner/architect; or pre-release |
+| P0-2 | `API_CONTRACT: yes` OR OpenAPI/GraphQL/Proto in `FILES` OR REST/BFF in `SCOPE` | api-contract | After architect; or post-dev pre-reviewer |
+| P0-3 | `SECURITY_AUDIT: yes` OR auth/crypto/API in `SCOPE` OR reviewer security finding flag | security-auditor | Post-dev, pre-reviewer (or post-architect for design-time) |
+| P0-4 | `RUN_TESTS: yes` OR test-strategy brief exists at `test-strategies/{TASK_ID}.md` | test-executor | Post-dev, pre-reviewer |
+
+**Phase A full feature chain (API + auth + deps):**
+
+`coordinator → osint → brainstorm → planner → architect → [dependency-risk?] → [api-contract?] → test-strategy → dev → [security-auditor?] → [test-executor?] → documenter → reviewer → [debate?] → [commit?]`
+
+**Ordering invariants:**
+
+1. `test-strategy` always **before** dev.
+2. `test-executor` always **after** dev, **before** documenter/reviewer.
+3. `dependency-risk` early when triggered — after osint, before planner/architect when in planning chain.
+4. `api-contract` after architect when in planning chain.
+
+**Overflow:** when projected chain > `MAX_CHAIN_AGENTS` (12), skip optional P0 specialists per [token-rules.md](../multi-agent-system/protocol/token-rules.md) skip order; record `skipped_specialists: []` in session JSON.
+
+Route to **dependency-risk** when predicate P0-1 matches. Handoff: `TARGET_AGENT: dependency-risk`, `MODEL_CLASS: fast`, `DELIVERABLE: Brief at .ai/context/supply-chain/{TASK_ID}.md`.
+
+Route to **api-contract** when predicate P0-2 matches. Handoff: `TARGET_AGENT: api-contract`, `MODEL_CLASS: normal`, `DELIVERABLE: Brief at .ai/context/api-contracts/{TASK_ID}.md`. Skill may skip gracefully when no spec in FILES/SCOPE — log skip in user summary.
+
+Route to **security-auditor** when predicate P0-3 matches. Handoff: `TARGET_AGENT: security-auditor`, `MODEL_CLASS: thinking`, `DELIVERABLE: Brief at .ai/context/security-audits/{TASK_ID}.md`. Advisory v1 — Blockers merge-blocking only when `SECURITY_BLOCKER: yes`.
+
+Route to **test-executor** when predicate P0-4 matches. Handoff: `TARGET_AGENT: test-executor`, `MODEL_CLASS: normal`, `TEST_STRATEGY_BRIEF: .ai/context/test-strategies/{TASK_ID}.md`, `DELIVERABLE: Brief at .ai/context/test-runs/{TASK_ID}.md`. Failures → **bug-fix**; executor does not patch.
+
+**MAS-07 (v1.5.0):** When device commands are in scope, copy optional `DEVICE_SERIAL` / `DEVICE_POLICY` to **test-strategy** and **test-executor** handoffs. Set `DEVICE_SERIAL` when user names a phone or prior run failed `AMBIGUOUS_DEVICE`. Default `DEVICE_POLICY: physical` for `TEST_SURFACE: ui`, connected commands, or `VISUAL_FIDELITY`; `emulator` when user wants emulator; omit for JVM-only workflows.
+
+**MAS-09 (v1.7.0) log capture:** When user requests repro logging or bug-repro workflow, set `LOG_CAPTURE: yes` on **test-executor** and **bug-fix** handoffs. Optional: `LOG_PACKAGE`, `LOG_TAG` (default `APP_TRACE`), `LOG_BUFFERS`, `LOG_FORMAT`. Lite alias: `LOG:y`. After dump, bug-fix handoff may set `BRIEF_PATH: .ai/context/device-logs/{TASK_ID}/capture-meta.json`. Cloud Agent without adb → Device Logs `SKIPPED` (do not FAIL workflow). Default `LOG_CAPTURE: no` — existing handoffs remain valid.
+
+## MAS-04 Phase B — P1 depth trio (deterministic predicates)
+
+Zero-token routing — same idempotency rules as Phase A. Evaluate after dev (and after ux-intelligence when `UI_CHANGES: yes`).
+
+| Priority | Predicate (any true) | Specialist | Default chain position |
+|----------|------------------------|------------|------------------------|
+| P1-1 | `UI_CHANGES: yes` (existing) | ux-intelligence | Post-dev, pre-documenter |
+| P1-2 | `A11Y_AUDIT: yes` OR release-readiness Accessibility FAIL OR interactive widgets in `FILES` | a11y | After ux-intelligence when both; else post-dev |
+| P1-3 | `I18N_AUDIT: yes` OR new strings/locale/RTL in `SCOPE` OR release-readiness Localization FAIL | i18n | After a11y when both triggered (sequential) |
+| P1-4 | `COMPLIANCE_FRAMEWORK:` set (SOC2\|GDPR\|HIPAA\|EU_AI_ACT\|FedRAMP) | compliance | Post-i18n segment or post-dev when UI chain skipped |
+
+**Phase B UI chain (Logic Flow C):**
+
+`dev → [ux-intelligence?] → [a11y?] → [i18n?] → [compliance?] → [test-executor?] → documenter → reviewer`
+
+**Ordering invariants (P1):**
+
+1. `ux-intelligence` **before** `a11y` when both `UI_CHANGES: yes` and a11y triggered.
+2. `a11y` **before** `i18n` when both triggered — **sequential only**; no parallel unless deferred `PARALLEL_READ: YES`.
+3. `compliance` **after** i18n segment when both triggered; may spawn without UI chain when only `COMPLIANCE_FRAMEWORK` set.
+4. `compliance` **never** spawns without `COMPLIANCE_FRAMEWORK` set.
+5. P1 segment completes **before** `test-executor` when test-executor triggered.
+
+**Release-readiness FAIL routing:** Accessibility FAIL → spawn **a11y** (not re-audit WCAG in release-readiness). Localization FAIL → spawn **i18n**. Compliance category FAIL → **compliance** when `COMPLIANCE_FRAMEWORK` on handoff; else fix agent per standards.
+
+**Overflow:** P1 optional specialists skip after P0 quartet per [token-rules.md](../multi-agent-system/protocol/token-rules.md): a11y (5) → i18n (6) → compliance (7).
+
+Route to **a11y** when predicate P1-2 matches. Handoff: `TARGET_AGENT: a11y`, `MODEL_CLASS: normal`, `DELIVERABLE: Brief at .ai/context/a11y-reviews/{TASK_ID}.md`. No layout/cosmetic redesign — WCAG depth only.
+
+Route to **i18n** when predicate P1-3 matches. Handoff: `TARGET_AGENT: i18n`, `MODEL_CLASS: normal`, `DELIVERABLE: Brief at .ai/context/i18n-reviews/{TASK_ID}.md`. No translation vendor workflow.
+
+Route to **compliance** when predicate P1-4 matches. Handoff: `TARGET_AGENT: compliance`, `MODEL_CLASS: thinking`, `COMPLIANCE_FRAMEWORK: <enum>`, `DELIVERABLE: Brief at .ai/context/compliance/{TASK_ID}.md`. Full `/mas` only — not lite. HITL for legal remediation.
+
 Route to **Bug Fix** when:
 
 - Crash, exception, ANR, failing test, regression, memory leak, incorrect behaviour
@@ -297,16 +430,19 @@ When Android Dev or General Dev completes with changed source files:
 
 **When `UI_CHANGES: YES`:**
 
-1. Dev handoff sets `NEXT_AGENT: ux-intelligence` (not `documenter`).
-2. Coordinator routes to **UX Intelligence** — post-dev, pre-documenter.
+1. Dev handoff sets `NEXT_AGENT: ux-intelligence` (not `documenter`); **must** declare `UI_CHANGES: YES | NO` when design-spec exists.
+2. Coordinator evaluates **P0-6** — when design-spec exists + `UI_CHANGES: YES`, route to **mas-visual-fidelity** first (before ux-intelligence).
+3. After mas-visual-fidelity (or when P0-6 suppressed), Coordinator routes to **UX Intelligence** — post-dev, pre-documenter.
 3. UX Intelligence writes brief to `.ai/context/ux-reviews/{TASK_ID}.md`.
 4. **If brief has P0/P1 implementable fixes** → Coordinator routes to **Dev** (second pass):
    - Handoff includes `UX_BRIEF: .ai/context/ux-reviews/{TASK_ID}.md`
    - `SCOPE: behavioral fixes only — no layout or cosmetic changes`
-   - Dev completes → **Documenter** → **Reviewer**
-5. **If no fixes or advisory-only** → Coordinator routes to **Documenter** → **Reviewer**.
+   - Dev completes → evaluate **P1 predicates** (a11y → i18n → compliance sequential) → **Documenter** → **Reviewer**
+5. **If no fixes or advisory-only** → evaluate **P1 predicates** when triggered → **Documenter** → **Reviewer**.
 
-**When `UI_CHANGES: NO`:** unchanged — Dev → Documenter → Reviewer.
+**Phase B P1 segment (after UX or directly after dev when no UX):** When predicates match, spawn **a11y** → **i18n** → **compliance** in order (skip absent predicates). P1 completes before **test-executor** when both triggered. Then **documenter** → **reviewer**.
+
+**When `UI_CHANGES: NO`:** Dev → evaluate P1 predicates if triggered (a11y/i18n/compliance without ux-intelligence) → Documenter → Reviewer.
 
 **Bug Fix chain:** optional UX Intelligence when Bug Fix sets `UI_CHANGES: YES` and fix touches interaction (coordinator discretion). Default unchanged: Imaginer → Bug Fix → Documenter → Reviewer. If UX spawned post-bugfix, insert before Documenter same as Dev.
 
@@ -604,6 +740,6 @@ After Reviewer approval:
 
 ## Agent Philosophy
 
-Planner plans. Brainstorm explores logic and options. Spec Reader ingests docs. OSINT researches external prior art. Architect designs. Test Strategy plans coverage before Dev writes tests. Developer builds. UX Intelligence evaluates interaction quality. Imaginer traces user-action data flow. Perf Optimizer profiles measurable performance gains. Release Readiness audits production ship readiness. Bug Fix Agent repairs. Documenter syncs in-code comments. Reviewer validates. Commit agent ships with user confirmation. Coordinator orchestrates.
+Planner plans. Brainstorm explores logic and options. Spec Reader ingests docs. OSINT researches external prior art. Architect designs. Test Strategy plans coverage before Dev writes tests. Dependency Risk audits supply-chain deltas. API Contract lints spec drift. Security Auditor validates threat models. Test Executor runs tests post-dev. A11y audits WCAG conformance. I18n audits locale/string architecture. Compliance maps regulatory evidence gaps. Developer builds. UX Intelligence evaluates interaction quality. Imaginer traces user-action data flow. Perf Optimizer profiles measurable performance gains. Release Readiness audits production ship readiness. Bug Fix Agent repairs. Documenter syncs in-code comments. Reviewer validates. Commit agent ships with user confirmation. Coordinator orchestrates.
 
 No agent performs another agent's primary responsibility unless explicitly requested.

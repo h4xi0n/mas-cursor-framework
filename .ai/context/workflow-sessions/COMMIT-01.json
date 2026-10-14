@@ -1,0 +1,21 @@
+﻿{
+    "task_id":  "COMMIT-01",
+    "mode":  "FULL",
+    "tier":  "none",
+    "type":  "feature",
+    "started_at":  "2026-07-27T21:48:53.9768158+05:30",
+    "reviewer_loop_count":  0,
+    "debate_used":  false,
+    "debate_round":  0,
+    "steps":  [
+                  {
+                      "agent":  "commit",
+                      "model":  "default",
+                      "model_class":  "normal",
+                      "tokens_in":  null,
+                      "tokens_out":  null,
+                      "tokens_source":  "unknown",
+                      "spawn_index":  1
+                  }
+              ]
+}

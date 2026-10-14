@@ -104,14 +104,18 @@ done
 if [ "$SKIP_HOOKS" -eq 0 ]; then
   HOOK_SESSION='bash ./hooks/mas-session-context.sh sessionStart'
   HOOK_SUB='bash ./hooks/mas-session-context.sh subagentStop'
+  HOOK_LOG_STOP='bash ./hooks/capture-device-logs-hook.sh stop'
+  HOOK_LOG_AFTER='bash ./hooks/capture-device-logs-hook.sh afterShellExecution'
   HOOKS_JSON="$TARGET_CURSOR_HOME/hooks.json"
 
   if [ -f "$HOOKS_JSON" ] && command -v jq >/dev/null 2>&1; then
     cp "$HOOKS_JSON" "$HOOKS_JSON.bak.mas" 2>/dev/null || true
-    jq --arg s "$HOOK_SESSION" --arg u "$HOOK_SUB" '
+    jq --arg s "$HOOK_SESSION" --arg u "$HOOK_SUB" --arg ls "$HOOK_LOG_STOP" --arg la "$HOOK_LOG_AFTER" '
       .version = (.version // 1) |
       .hooks.sessionStart = ((.hooks.sessionStart // []) + [{command: $s}] | unique_by(.command)) |
-      .hooks.subagentStop = ((.hooks.subagentStop // []) + [{command: $u}] | unique_by(.command))
+      .hooks.subagentStop = ((.hooks.subagentStop // []) + [{command: $u}] | unique_by(.command)) |
+      .hooks.stop = ((.hooks.stop // []) + [{command: $ls}] | unique_by(.command)) |
+      .hooks.afterShellExecution = ((.hooks.afterShellExecution // []) + [{command: $la}] | unique_by(.command))
     ' "$HOOKS_JSON" > "$HOOKS_JSON.tmp" && mv "$HOOKS_JSON.tmp" "$HOOKS_JSON"
     echo "Updated: hooks.json (merged with jq)"
   else

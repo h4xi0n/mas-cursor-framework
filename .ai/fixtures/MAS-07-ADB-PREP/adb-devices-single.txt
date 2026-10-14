@@ -1,0 +1,2 @@
+List of devices attached
+R58M90ABCDE	device product:beyond1xx model:SM_G973F device:beyond1 transport_id:1

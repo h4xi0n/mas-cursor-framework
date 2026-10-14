@@ -42,9 +42,10 @@ Spawned by Coordinator via **Task** (`generalPurpose`, foreground). Read [subage
 4. When `.ai/context/release-readiness/{TASK_ID}.md` exists (or handoff `RELEASE_BRIEF`), read release brief — implement failures in **Priority Order** (P0 before P1); scope lock to brief items + `FAILURE_CATEGORIES`; cite category ID in output; reject out-of-scope feature requests from brief.
 5. When `.ai/context/osint/{TASK_ID}.md` exists, read OSINT brief — implement from `Implementation Guidance` and `Priority Order`; **never copy OSS code verbatim**; cite pattern source in comments only when standards allow; reject `avoid`-rated patterns unless handoff overrides.
 6. When `.ai/context/test-strategies/{TASK_ID}.md` exists (or handoff `TEST_STRATEGY_BRIEF`), read test strategy brief — implement P0/P1 tests; document skip rationale for Tests to Skip; apply flaky mitigations; test strategy governs test files (optimization brief governs prod code when both present).
-7. Read context per read-order + `android-veteran-standards.md` (skim sections for task).
-8. Find 1–2 similar screens/repos in codebase; mirror their patterns.
-9. Read target files and Gradle module deps before editing.
+7. When `.ai/context/design-specs/{TASK_ID}.md` exists — read design-spec at startup including **Verification Contract** slice; treat Layout Spec / MCP snippets as **reference — not final code**; implement 1:1 vs Screenshot Reference; document capture paths (Paparazzi test class, `@Preview` name, `screenshotTest/reference/` baseline PNG) in handoff `FILES` per Capture Recipe; download-and-commit assets per Asset Manifest; do **not** call Figma MCP when design-spec exists. **Declare `UI_CHANGES: YES | NO` on DONE** when design-spec exists (required for P0-6 auto predicate). Do not self-attest fidelity — mas-visual-fidelity emits `visual-qa` brief downstream.
+8. Read context per read-order + `android-veteran-standards.md` (skim sections for task).
+9. Find 1–2 similar screens/repos in codebase; mirror their patterns.
+10. Read target files and Gradle module deps before editing.
 
 ## OSINT Brief
 
@@ -100,6 +101,7 @@ Before `DONE`, verify:
 - [ ] Tests added for non-trivial ViewModel/repository logic — **run them**
 - [ ] **Gradle compile** on affected module(s): `./gradlew :<module>:compileDebugKotlin` — fix errors
 - [ ] **Visual intent documented** — how UI should look across phone, fontScale, landscape (see Visual Notes)
+- [ ] **Launch Recipe documented** when Capture Recipe uses `connected-device` — `LAUNCH:` block in handoff (package, deeplink-uri or activity, `post-launch-wait-ms`); `ADB_SERIAL` when multi-device; debug APK install command (`./gradlew installDebug`) if needed
 - [ ] ReadLints on all changed files — fix errors introduced
 
 ## Output
@@ -172,7 +174,44 @@ Optional `## Usage Report` before `DONE` — **full `/mas` only**; omit in lite 
 
 Return code only in `## Files` unless handoff asks for explanation.
 
-Coordinator routes to **UX Intelligence** next when `UI_CHANGES: YES` (`NEXT_AGENT: ux-intelligence`); to **Documenter** when `UI_CHANGES: NO` or logic-only.
+Coordinator routes to **mas-visual-fidelity** first when P0-6 fires (design-spec + `UI_CHANGES: YES`), then **UX Intelligence** (`NEXT_AGENT: ux-intelligence`); to **Documenter** when `UI_CHANGES: NO` or logic-only.
+
+## Repro logging convention (MAS-09 v1.7.0)
+
+Target apps only — not shipped in MAS framework repo. Enables filtered logcat capture via `APP_TRACE` tag. SOT: [device-log-capture.md](../multi-agent-system/references/device-log-capture.md).
+
+| Signal | Mechanism | Log fields |
+|--------|-----------|------------|
+| Exceptions | `Timber.e(t, msg)` + `Thread.setDefaultUncaughtExceptionHandler` chaining | `event=uncaught`, `priority=E` |
+| API calls | Custom OkHttp `EventListener.Factory` (not `LoggingEventListener`) | `event=http`, `method`, `host`, `path`, `status`, `duration_ms` |
+| Lifecycle | `ProcessLifecycleOwner` + `ActivityLifecycleCallbacks` | `event=lifecycle`, `screen`, `state` |
+| Navigation | Fragment/Compose route observer (app-specific) | `event=nav`, `route` |
+| Repro correlation | App logs `event=repro_marker` OR host marker timestamp | matches `repro-marker.json` |
+
+**Tag namespace:** `APP_TRACE` (configurable via handoff `LOG_TAG`). Filter: `adb logcat APP_TRACE:D *:S`.
+
+**Redaction (non-negotiable):** Never log auth headers, tokens, PII, passwords. OkHttp EventListener must redact bodies. R8 `-assumenosideeffects` for debug `Log` in release. Chucker/Flipper: optional `debugImplementation` only — MAS reads logcat artifacts, not inspector DB.
+
+**structlog-timber:** Optional third-party mention only — not a MAS dependency.
+
+### Illustrative Kotlin (reference only)
+
+```kotlin
+// Custom Timber tree — JSON-encode structured fields
+class AppTraceTree : Timber.Tree() {
+    override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
+        if (tag != "APP_TRACE") return
+        Log.println(priority, tag, message)
+    }
+}
+
+// OkHttp EventListener — log metadata only, never bodies
+override fun callEnd(call: Call) {
+    Timber.tag("APP_TRACE").d(
+        """{"event":"http","method":"${call.request().method}","host":"${call.request().url.host}","path":"${call.request().url.encodedPath}","status":${response?.code},"duration_ms":$duration}"""
+    )
+}
+```
 
 ## Never
 

@@ -1,0 +1,7 @@
+{
+  "status": "PASS",
+  "exit_code": "PASS",
+  "message": "Dumped 5 lines to .ai/context/device-logs/MAS-09/",
+  "capture_meta_path": ".ai/context/device-logs/MAS-09/capture-meta.json",
+  "line_count": 5
+}

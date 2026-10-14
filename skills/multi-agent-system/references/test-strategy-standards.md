@@ -138,6 +138,64 @@ Flag HIGH flaky risk on P0 tests — Dev must apply mitigation before merge.
 
 State overall confidence in brief `Overall Confidence`.
 
+## Device Prerequisites (MAS-07 v1.5.0)
+
+Emit when **any** Recommended Command touches device shell, connected instrumentation, screencap, or Maestro. Write after **Recommended Commands**, before brief file save. SOT: [device-prep-automation.md](device-prep-automation.md).
+
+```markdown
+## Device Prerequisites
+
+| Field | Value |
+|-------|-------|
+| Enrollment | required \| enrolled (assumed) |
+| Target | physical \| emulator \| managed-ftl \| none |
+| Prep gate | required \| skip |
+| DEVICE_SERIAL | <serial> or — |
+| DEVICE_POLICY | physical \| emulator \| auto |
+| Package | <applicationId> or — |
+| Permissions to pre-grant | <list> or — |
+| adb reverse | <tcp:host:device pairs> or — |
+| Skip rationale | <text when Prep gate = skip> |
+```
+
+### Prep gate required / skip
+
+| Recommended Commands contain | Prep gate |
+|-------------------------------|-----------|
+| `connectedDebugAndroidTest`, `connectedReleaseAndroidTest` | **required** |
+| `adb exec-out screencap`, `adb shell`, `adb pull`, `am start` | **required** |
+| `maestro test` | **required** |
+| `verifyPaparazziDebug`, `testDebugUnitTest` only | **skip** |
+| `validateDebugScreenshotTest` only | **skip** |
+| `managed-ftl` / Firebase Test Lab | **skip** (Target: `managed-ftl`) |
+
+**Defaults:** `DEVICE_POLICY: physical` when `TEST_SURFACE: ui`, connected commands, or `VISUAL_FIDELITY`; else `auto`. Copy `DEVICE_SERIAL` / `DEVICE_POLICY` from coordinator handoff when set. **Skip rationale mandatory** when `Prep gate: skip`.
+
+## Device Logs Prerequisites (MAS-09 v1.7.0)
+
+Emit when handoff `LOG_CAPTURE: yes` (or lite `LOG:y`) or repro/bug surface in strategy. Write after **Device Prerequisites** when both apply. SOT: [device-log-capture.md](device-log-capture.md).
+
+```markdown
+## Device Logs Prerequisites
+
+| Field | Value |
+|-------|-------|
+| Log capture gate | required \| skip |
+| Tag namespace | APP_TRACE |
+| Package | <applicationId> or — |
+| Buffers | main,crash |
+| Format | json \| threadtime or API-aware |
+| Clear before repro | yes when LOG_CAPTURE: yes |
+| Skip rationale | mandatory when Log capture gate = skip |
+```
+
+| Condition | Log capture gate |
+|-----------|------------------|
+| `LOG_CAPTURE: yes` + adb commands | **required** (Step 0b + Post dump) |
+| JVM-only (`LOG_CAPTURE: no`) | **skip** — omit Device Logs section |
+| Prep FAIL | blocked — Device Logs `SKIPPED` |
+| Cloud Agent / no adb | **skip** — platform-parity rationale |
+
 ## Brief file schema
 
 Path: `.ai/context/test-strategies/{TASK_ID}.md`
@@ -153,6 +211,9 @@ Path: `.ai/context/test-strategies/{TASK_ID}.md`
 
 ## Test Surfaces
 unit | integration | ui
+
+## Device Prerequisites
+<table when device commands planned — see above>
 
 ## Tests to Write
 | # | Type | Target | Scenario | Rationale | Priority | Flaky risk | Mitigation | Command hint |

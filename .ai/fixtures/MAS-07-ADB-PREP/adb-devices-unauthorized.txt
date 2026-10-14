@@ -1,0 +1,2 @@
+List of devices attached
+ABC123	unauthorized usb:1-2 product:pixel model:Pixel_7 device:pixel7 transport_id:1
