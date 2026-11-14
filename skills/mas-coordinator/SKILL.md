@@ -258,8 +258,11 @@ Route to **Perf Optimizer** when:
 - Slowness, jank, scroll lag, slow cold start, high memory, battery drain, scalability concern, or "optimize this"
 - **Default before Dev** for non-trivial perf symptoms — profile existing implementation and rank findings first
 - User asks for perf analysis without fixing yet (`ANALYZE_ONLY: true`)
+- **List gate** — the work builds or changes a collection screen or listing API (feed, catalog, search results, history, inbox, notifications, grid, infinite scroll, paging, page size, cursor/offset/limit), even when the user did not say "slow"
 
-**Mutual exclusivity:** do not chain Perf Optimizer and Imaginer for the same `TASK_ID` without explicit user override. Crash/wrong data → Imaginer; interaction friction is out of scope for Perf Optimizer; perf/jank metrics → Perf Optimizer. Mixed perf + functional bug → **Imaginer first** (correctness before optimization). Greenfield feature work → never perf-optimizer as entry.
+**List gate placement:** not the workflow entry. After planner/architect (whichever ran last) and **before** test-strategy and dev. Set `LIST_SURFACE: true`. One list pass per `TASK_ID`. `PERF_SYMPTOM` for that pass: decide pagination, page size, and first-load budget; item UI unchanged. Playbook: [list-surface-performance.md](../multi-agent-system/references/list-surface-performance.md).
+
+**Mutual exclusivity:** do not chain Perf Optimizer and Imaginer for the same `TASK_ID` without explicit user override. Crash/wrong data → Imaginer; interaction friction is out of scope for Perf Optimizer; perf/jank metrics → Perf Optimizer. Mixed perf + functional bug → **Imaginer first** (correctness before optimization). Greenfield feature work → never perf-optimizer as the **entry** agent (the list gate above is the exception, and it is not the entry).
 
 Perf Optimizer handoff must include:
 
@@ -267,11 +270,12 @@ Perf Optimizer handoff must include:
 - `SCOPE` — screens, modules, flows, or file prefixes to analyze
 - `METRICS` — baseline numbers or `unknown` (optional)
 - `FILES` — seed paths (optional)
+- `LIST_SURFACE` — `true` for the list gate (also `LIST_KIND`, `API_HINT`, `PAGE_SIZE_CURRENT`, `ITEM_LAYOUT` when known)
 - `ANALYZE_ONLY` — `true` | `false` (default `false` → chain to dev after brief)
 - `DELIVERABLE: Brief at .ai/context/optimizations/{TASK_ID}.md`
-- `NEXT_AGENT: android-dev` | `general-dev` | `none` (platform from `project.md` or stack detection; `none` when `ANALYZE_ONLY: true`)
+- `NEXT_AGENT: android-dev` | `general-dev` | `none` (platform from `project.md` or stack detection; `none` when `ANALYZE_ONLY: true`; list gate usually `test-strategy` when a feature chain would have inserted it, else dev)
 
-Skip Perf Optimizer only for: trivial one-line/obvious perf fixes, config-only tweaks, user says skip analysis, or functional bug is primary symptom.
+Skip Perf Optimizer only for: trivial one-line/obvious perf fixes, config-only tweaks, user says skip analysis, functional bug is primary symptom, or a menu/settings list of 5 or fewer fixed local text rows. Do not skip the list gate for a network-backed or unbounded collection.
 
 Route to **Release Readiness** when:
 
@@ -310,7 +314,7 @@ Skip Release Readiness only for: greenfield feature work with no ship intent, tr
 
 Route to **Test Strategy** when:
 
-- **Default before Dev** — Planner or Architect completed and `NEXT_AGENT` was dev; insert test-strategy before dev for non-trivial features with testable logic (ViewModel, repository, API, state machine, new screen)
+- **Default before Dev** — Planner or Architect completed and `NEXT_AGENT` was dev; insert test-strategy before dev for non-trivial features with testable logic (ViewModel, repository, API, state machine, new screen). If the list gate applies, perf-optimizer runs first so the strategy can assert the decided page size.
 - Planner `Required Agents` lists dev and scope is non-trivial testable
 - User requests test plan / "what should we test"
 - **Optional:** complex bug fix after Imaginer when regression test plan is non-obvious — `imaginer → test-strategy → bug-fix` (coordinator discretion; not default)
@@ -503,7 +507,9 @@ When routing a non-trivial performance symptom:
 
 When `ANALYZE_ONLY: true`, Perf Optimizer completes with `NEXT_AGENT: none` — no Dev unless user requests fix next.
 
-**Optional perf chain:** `perf-optimizer → test-strategy → dev` when perf regression tests are non-obvious (user request only). Default unchanged: `perf-optimizer → dev`.
+**List gate:** `… → perf-optimizer` (`LIST_SURFACE: true`) `→ test-strategy → dev` on feature work that is a collection or listing API. Symptom-only list tuning stays `perf-optimizer → dev` unless the user asked for tests.
+
+**Optional perf chain:** `perf-optimizer → test-strategy → dev` when perf regression tests are non-obvious (user request only). Default for non-list symptoms unchanged: `perf-optimizer → dev`.
 
 **Reviewer loop after perf dev:** route back to **dev** with Reviewer findings — not back to perf-optimizer unless user requests re-analysis.
 

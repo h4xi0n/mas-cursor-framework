@@ -1,4 +1,4 @@
-# Platform Parity (MAS-07 / MAS-09)
+# Platform Parity (MAS-07 / MAS-09 / MAS-10)
 
 Honest boundaries for adb-dependent workflows across Cursor environments.
 
@@ -9,6 +9,7 @@ Honest boundaries for adb-dependent workflows across Cursor environments.
 | `android-device-prep` (MAS-07) | Yes — requires `adb` on PATH |
 | `capture-connected-device` (MAS-07) | Yes |
 | `capture-device-logs` (MAS-09) | Yes — requires prior prep PASS + `ANDROID_SERIAL` |
+| Host build/install mutex (MAS-10) | Yes — shared `MAS_LOCK_ROOT` on local host |
 
 ## Cursor Cloud Agent
 
@@ -17,6 +18,7 @@ Honest boundaries for adb-dependent workflows across Cursor environments.
 | Device prep | `SKIPPED` — Gaps cite `BLOCKED: no adb on agent host` |
 | Log capture (`LOG_CAPTURE: yes`) | `SKIPPED` — same rationale; workflow not FAIL (D12) |
 | Hook `stop` dump | fail-open `{}` when adb unavailable |
+| Host mutex (`mas-host-exec`) | **SKIPPED** — no shared host FS with local IDE; do not block on locks |
 
 ## Hook payload drift
 

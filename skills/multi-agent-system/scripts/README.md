@@ -203,6 +203,55 @@ powershell -File skills/multi-agent-system/scripts/capture-device-logs.ps1 `
 
 Artifacts: `.ai/context/device-logs/{TASK_ID}/capture-meta.json`, `logcat-main.jsonl`, `logcat-crash.txt`, `repro-marker.json`
 
+## Host build/install mutex (MAS-10 v1.8.0)
+
+Machine-wide **build** and **install** lanes for parallel Cursor chats on one host.
+
+| Script | Platform |
+|--------|----------|
+| `mas-host-lock.ps1` / `mas-host-exec.ps1` | Windows (primary) |
+| `mas-host-lock.sh` / `mas-host-exec.sh` | Linux/macOS/CI |
+
+Reference: [host-build-install-mutex.md](../references/host-build-install-mutex.md)
+
+### Quick start
+
+```powershell
+powershell -File skills/multi-agent-system/scripts/mas-host-exec.ps1 `
+  -TaskId MAS-XX -RepoRoot $PWD -WaitSec 0 `
+  -ChildArgv @('./gradlew', ':app:installDebug')
+```
+
+```bash
+./skills/multi-agent-system/scripts/mas-host-exec.sh \
+  --task-id MAS-XX --workspace "$(pwd)" \
+  -- ./gradlew :app:connectedDebugAndroidTest
+```
+
+### Fixture testing
+
+```powershell
+powershell -File skills/multi-agent-system/scripts/Test-MasHostLock.ps1
+```
+
+See `.ai/fixtures/MAS-10-HOST-LOCK/README.md`
+
+| Env var | Purpose |
+|---------|---------|
+| `MAS_LOCK_ROOT` | Override lock directory |
+| `MAS_HOST_LOCK=skip` | Passthrough (fixtures / CI opt-out) |
+| `MAS_LOCK_VERBOSE=1` | Human poll hints |
+
+### Exit codes (lock CLI)
+
+| Code | `exit_code` | Meaning |
+|------|-------------|---------|
+| 0 | PASS | Success |
+| 7 | INVALID_ARGS | Bad flags |
+| 20 | LOCK_TIMEOUT | `--wait-sec` exceeded |
+| 21 | LOCK_HELD | Release refused |
+| 22 | LOCK_STALE_BREAK_FAILED | break-stale refused |
+
 ## Other scripts
 
 See individual script header comments for `init-workflow-session`, `record-workflow-step`, `finalize-workflow-usage`, and context maintenance utilities.

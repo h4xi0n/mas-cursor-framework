@@ -49,6 +49,7 @@ Spawned by Coordinator via **Task** (`generalPurpose`, foreground). Read [subage
 6. Read **only** files listed in handoff `FILES` — do not broad-scan the repo.
 7. When `.ai/context/design-specs/{TASK_ID}.md` exists — read **Verification Contract** slice; align **Recommended Commands** with Capture Recipe (Paparazzi `verifyPaparazziDebug`, Compose Preview `validateDebugScreenshotTest`, connected-device `capture-connected-device.{ps1|sh}`). Test-strategy plans capture commands consumed by mas-visual-fidelity — does not replace fidelity specialist.
 8. When device commands planned, read [device-prep-automation.md](../multi-agent-system/references/device-prep-automation.md) slice (prerequisites + skip rules). Honor handoff `DEVICE_SERIAL` / `DEVICE_POLICY`.
+9. When `.ai/context/optimizations/{TASK_ID}.md` contains **List Surface Decision**, read that section. Add one P0 test: the first request uses the decided page size and strategy and does not load the full collection. Do not pick a different page size.
 
 ## Connected Device Capture (MAS-07)
 
@@ -60,7 +61,7 @@ When design-spec Capture Recipe includes `connected-device` or handoff `DEVICE_C
 | Device Target | `adb-serial` when multi-device; `form-factor`, `orientation` |
 | Pre-Capture | Optional `fontScale`, `uiMode`, `crop-rect` |
 | Script command | `capture-connected-device.{ps1\|sh}` with flags from contract |
-| Pre-install | `./gradlew :app:installDebug` — test-executor or dev responsibility |
+| Pre-install | `mas-host-exec` + `./gradlew :app:installDebug` — test-executor or dev; see [host-build-install-mutex.md](../multi-agent-system/references/host-build-install-mutex.md) |
 | When to recommend | Tier 3 when Paparazzi/Preview unavailable, integration parity needed, or `DEVICE_CAPTURE: yes` override |
 
 ## Handoff Context
@@ -79,12 +80,13 @@ Typical handoff fields:
 
 1. Restate feature goal and bound `SCOPE`; note `TEST_SURFACE`.
 2. Map architectural layers under test (UI → presentation → domain → data).
+2.5. If an optimization brief has **List Surface Decision**, add the P0 page-size request test from startup. The list playbook already chose the limit.
 3. Build **Tests to Write** table per per-test record format in standards.
 4. Build **Tests to Skip** table with mandatory rationale for each skip.
 5. Populate edge-case matrix for applicable flows.
 6. Check daily changelog for same-day regression risks.
 7. Flag flaky-test risks and recommend mitigations (not full patches).
-8. List **Recommended Commands** aligned with stack (Gradle vs npm/pytest).
+8. List **Recommended Commands** aligned with stack (Gradle vs npm/pytest). For Android Gradle / `adb install*`, document **`mas-host-exec`** wrapper + `TASK_ID` ([host-build-install-mutex.md](../multi-agent-system/references/host-build-install-mutex.md)).
 8.5. Emit **Device Prerequisites** table when any Recommended Command touches adb, connected instrumentation, screencap, or Maestro — per [test-strategy-standards.md](../multi-agent-system/references/test-strategy-standards.md). Default `DEVICE_POLICY: physical` when `TEST_SURFACE: ui`, connected commands, or `VISUAL_FIDELITY`; else `auto`. Mandatory skip rationale when `Prep gate: skip`.
 8.6. Emit **Device Logs Prerequisites** when handoff `LOG_CAPTURE: yes` or repro/bug surface — per [device-log-capture.md](../multi-agent-system/references/device-log-capture.md). Honor `LOG_PACKAGE` / `LOG_TAG` from handoff.
 9. Write brief file (create `test-strategies/` directory if missing); return output template.

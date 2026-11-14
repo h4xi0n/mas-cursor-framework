@@ -2,6 +2,8 @@
 
 Reference for the **Performance Optimization** agent (`mas-perf-optimizer`). Defines how to profile existing implementations and recommend measurable production gains without patching code.
 
+Collection screens and listing APIs also follow [list-surface-performance.md](list-surface-performance.md): pagination, page size, load budget, and a faster container with the item UI frozen. That playbook wins over generic scalability notes when they disagree.
+
 ## Purpose & boundaries
 
 | In scope | Out of scope |
@@ -30,6 +32,11 @@ Coordinator handoff should include:
 | `METRICS` | Optional | Baseline numbers or `unknown` |
 | `FILES` | Optional | Seed paths — ViewModels, composables, repos, startup entry |
 | `ANALYZE_ONLY` | Optional | `true` → deliver brief only; no dev chain |
+| `LIST_SURFACE` | When a collection | `true` (lite `LIST:y`) — run the list playbook |
+| `LIST_KIND` | Optional | `feed` \| `search` \| `catalog` \| `history` \| `grid` \| `inbox` \| `other` |
+| `API_HINT` | Optional | Endpoint or `unknown` |
+| `PAGE_SIZE_CURRENT` | Optional | Current limit, `none`, or `unknown` |
+| `ITEM_LAYOUT` | Optional | Item composable / XML / row path that must not change visually |
 | `DELIVERABLE` | Default | Brief at `.ai/context/optimizations/{TASK_ID}.md` |
 
 Startup reads: handoff, `memory.md`, `daily-changelog.md` (if present), this doc, then **only** relevant source files.
@@ -56,7 +63,7 @@ Analyze applicable axes — not every axis applies to every symptom:
 | **Startup** | Critical path init, lazy vs eager DI, content provider cost |
 | **Battery** | Wake locks, frequent wakeups, background work scheduling |
 | **ANR risk** | Main-thread blocking, binder calls, heavy sync on UI |
-| **Scalability** | Pagination, unbounded lists, O(n²) operations on growth |
+| **Scalability** | Pagination, unbounded lists, O(n²) on growth. Collections: decide strategy and page size per [list-surface-performance.md](list-surface-performance.md) — do not stop at "add pagination" |
 | **Architecture** | Layer violations causing redundant work, missing boundaries |
 
 Keep analysis **concrete** ("`ExportViewModel.loadAll()` fetches full list on main dispatcher") not abstract ("performance could be better").
@@ -162,8 +169,11 @@ Path: `.ai/context/optimizations/{TASK_ID}.md`
 ## Open Questions
 - ...
 
+## List Surface Decision
+<N/A — not a collection | table from list-surface-performance.md>
+
 ## Expected Improvement
-<what metric should improve post-implementation — for reviewer>
+<what metric should improve post-implementation — for reviewer; lists include KB, time to first item, or fling frames>
 ```
 
 Create `optimizations/` directory if missing. Brief is durable for the workflow session; Dev and Reviewer read it when present.
@@ -174,10 +184,11 @@ Coordinator may **skip Perf Optimizer** and route directly to **dev** when:
 
 - Trivial one-line perf fix obvious (e.g. missing `remember`, single `Dispatchers.IO`)
 - User explicitly says "skip analysis" / "just fix"
-- Greenfield feature work — never perf-optimizer as entry
+- Greenfield work that is **not** a collection — perf-optimizer is never the workflow entry. A collection screen or listing API still runs the list gate (`LIST_SURFACE: true`) after planner/architect and before test-strategy/dev.
+- Menus and settings of 5 or fewer fixed local text rows
 - Functional bug primary (crash, wrong data) — imaginer chain, not perf
 
-When in doubt for jank, startup, memory, battery — **run Perf Optimizer first**.
+When in doubt for jank, startup, memory, battery, or an unbounded list — **run Perf Optimizer first**. Collections that are new work use the list gate before dev, not as the entry agent.
 
 ## Mutual exclusivity
 
@@ -186,7 +197,7 @@ Perf Optimizer and Imaginer are **mutually exclusive entry points** for a given 
 | Signal | Route |
 |--------|-------|
 | Crash, wrong data, functional bug | Imaginer → Bug Fix |
-| Jank, slow start, memory, battery | Perf Optimizer → Dev |
+| Jank, slow start, memory, battery, list load, page size, pagination | Perf Optimizer → Dev |
 | Mixed perf + functional bug | Imaginer first — correctness before optimization |
 | ANR + stack trace pointing to bug | Imaginer → Bug Fix |
 | ANR risk / main-thread blocking, no clear bug | Perf Optimizer → Dev |

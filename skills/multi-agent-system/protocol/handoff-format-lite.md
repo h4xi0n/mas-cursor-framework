@@ -43,6 +43,7 @@ DONE
 | `DEVICE_SERIAL:` | `DEV_SER:` | `DEV_SER:R58M90ABCDE` |
 | `DEVICE_POLICY:` | `DEV_POL:` | `DEV_POL:physical` |
 | `LOG_CAPTURE:` | `LOG:` | `LOG:y` |
+| `LIST_SURFACE:` | `LIST:` | `LIST:y` |
 
 **`SEC:` disambiguation (12-line cap):** `SEC:y` or `SEC:n` → `SECURITY_AUDIT` routing flag. `SEC: Heading1, Heading2` (comma-separated headings) → `SECTIONS:` slice per [brief-schemas.md](brief-schemas.md). Do not combine both on one line.
 
@@ -102,8 +103,11 @@ Default non-trivial bug: `imaginer` (`NEXT_AGENT: bug-fix`) → `bug-fix` (`NEXT
 
 Default non-trivial perf: `perf-optimizer` (`NEXT_AGENT: android-dev` | `general-dev`) → dev (`NEXT_AGENT: reviewer`). Max 2 subagents.
 
+List pagination, page size, or list load time uses the same chain with `LIST:y`. The brief’s **List Surface Decision** is mandatory for collections. Playbook: [list-surface-performance.md](../references/list-surface-performance.md).
+
 - Analyze only: `perf-optimizer` + `ANALYZE_ONLY: true`, `NEXT_AGENT: none`
-- Trivial: dev only when fix obvious
+- Trivial: dev only when fix obvious (not for an unbounded or network-backed list)
+- L tier, clear collection scope: `perf-optimizer` (`LIST:y`) → `dev` → `reviewer` (cap 3). If planner is required, skip the specialist and have dev apply the playbook; say so in the user summary.
 
 ## S-Tier Release Chain (Lite)
 

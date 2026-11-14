@@ -21,6 +21,7 @@ description: General Dev agent for multi-agent workflows. Implements React, Next
 - On UX fix pass: implement ranked P0/P1 **behavioral fixes only** from UX brief; reject cosmetic/layout items per [ux-intelligence-standards.md](../multi-agent-system/references/ux-intelligence-standards.md); do not expand scope beyond brief + handoff.
 - If brief empty or no fixes, proceed as normal dev completion.
 - On perf fix pass: cite finding `#` in output; may skip LOW confidence items with rationale; note `PERF_FIXES_APPLIED:` summary for Documenter/Reviewer.
+- On a list surface: implement the brief’s page size and container swap only. Do not restyle the row component. See [list-surface-performance.md](../multi-agent-system/references/list-surface-performance.md).
 - On release fix pass: implement P0/P1 failures from release brief in **Priority Order**; cite category ID in output; scope lock to brief + `FAILURE_CATEGORIES`; reject out-of-scope feature requests.
 - On test strategy pass: implement P0/P1 tests from brief; document skip rationale for Tests to Skip; apply flaky mitigations; cite test `#` in `## Tests` output; do not expand scope beyond brief + handoff.
 
@@ -32,7 +33,7 @@ Spawned by Coordinator via **Task** (`generalPurpose`, foreground). Read [subage
 
 1. Read handoff at `.ai/handoffs/{TASK_ID}.md`.
 2. When handoff includes `UX_BRIEF` or `.ai/context/ux-reviews/{TASK_ID}.md` exists, read UX brief first — implement P0/P1 behavioral fixes only; reject cosmetic/layout items per [ux-intelligence-standards.md](../multi-agent-system/references/ux-intelligence-standards.md).
-3. When `.ai/context/optimizations/{TASK_ID}.md` exists, read optimization brief — implement findings in **Priority Order**; preserve behavior/UI unless brief `Significant-Gain Exceptions` covers the change; reject feature requests from brief.
+3. When `.ai/context/optimizations/{TASK_ID}.md` exists, read optimization brief — implement findings in **Priority Order**; preserve behavior/UI unless brief `Significant-Gain Exceptions` covers the change; reject feature requests from brief. When the brief has **List Surface Decision**, read [list-surface-performance.md](../multi-agent-system/references/list-surface-performance.md) and treat that table as the lock.
 4. When `.ai/context/release-readiness/{TASK_ID}.md` exists (or handoff `RELEASE_BRIEF`), read release brief — implement failures in **Priority Order** (P0 before P1); scope lock to brief items + `FAILURE_CATEGORIES`; cite category ID in output; reject out-of-scope feature requests from brief.
 5. When `.ai/context/test-strategies/{TASK_ID}.md` exists (or handoff `TEST_STRATEGY_BRIEF`), read test strategy brief — governs test files when optimization brief also present.
 6. When `.ai/context/design-specs/{TASK_ID}.md` exists — read design-spec at startup including **Verification Contract** slice; treat extracted layout/code as **reference — not final code**; implement 1:1 vs Screenshot Reference; document capture paths (Paparazzi class, `@Preview` name, baseline PNG) in handoff `FILES` per Capture Recipe; when Capture Recipe uses `connected-device`, document **Launch Recipe** in handoff `LAUNCH:` block (see [mas-android-dev](../mas-android-dev/SKILL.md) checklist); download-and-commit assets per Asset Manifest; do **not** call Figma MCP when design-spec exists. **Declare `UI_CHANGES: YES | NO` on DONE** when design-spec exists (required for P0-6 auto predicate). Do not self-attest fidelity — mas-visual-fidelity emits `visual-qa` brief downstream.
@@ -70,6 +71,15 @@ When `.ai/context/optimizations/{TASK_ID}.md` exists:
 - Cite finding `#` in output; may skip LOW confidence items with rationale
 - Reject feature requests from brief — note out-of-scope, do not implement
 - If brief missing, proceed normally
+
+### List surface lock
+
+When the brief contains **List Surface Decision** (or handoff `LIST_SURFACE: true` / `LIST:y`):
+
+- Use the decided pagination, page size, and existing query param. Do not rename the API.
+- Swap only the list host named in the brief (virtualized / windowed list, or in-repo equivalent). The row component in **Item UI frozen** gets no visual edit.
+- Do not add chrome (skeleton, footer, filter) the screen does not already have.
+- If this task is a collection and **no** optimization brief exists, read [list-surface-performance.md](../multi-agent-system/references/list-surface-performance.md), apply the web section, and copy the decision into `PERF_FIXES_APPLIED`.
 
 ## Release Brief
 

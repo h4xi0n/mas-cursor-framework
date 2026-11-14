@@ -28,13 +28,13 @@ Low-token alternative to full `/mas`. Load [mas-coordinator](../mas-coordinator/
 | Tier | When | Chain | Subagents max |
 |------|------|-------|---------------|
 | **S** | Bug fix, crash, regression | `imaginer` → `bug-fix` (default), `osint` → `imaginer` \| `bug-fix` (difficult bug with prior art), `imaginer` only (`TRACE_ONLY`), `osint` only (`RESEARCH_ONLY`), or `bug-fix` only (trivial skip) | **2** |
-| **S** | Perf symptom (jank, slow start, memory, battery) | `perf-optimizer` → `android-dev` \| `general-dev` (default), or `perf-optimizer` only (`ANALYZE_ONLY`) | **2** |
+| **S** | Perf symptom (jank, slow start, memory, battery) or a list/feed/catalog pagination, page size, or load-time pass | `perf-optimizer` (`LIST:y` when it is a collection) → `android-dev` \| `general-dev` (default), or `perf-optimizer` only (`ANALYZE_ONLY`) | **2** |
 | **S** | Release / ship / production readiness | `release-readiness` → `android-dev` \| `general-dev` \| `bug-fix` (default), or `release-readiness` only (`RELEASE_ONLY`) | **2** |
 | **S** | Typo, config tweak, obvious one-liner | `bug-fix` or `android-dev` / `general-dev` only | **1** |
 | **S** | Explicit UX audit request | `ux-intelligence` only (`UX_ONLY: true`) — e.g. `/mas-lite S ux pass on onboarding` | **1** |
 | **S** | Explicit test plan request | `test-strategy` only (`STRATEGY_ONLY: true`) — e.g. `/mas-lite S test strategy for export module` | **1** |
 | **M** | Small feature, 3–8 files, clear scope | `dev` → `ux-intelligence` when `UI_CHANGES: YES`; else `dev` → `reviewer` (lite) | **2** |
-| **L** | Medium feature, needs plan, no external docs | `planner` → `dev` → `ux-intelligence` when `UI_CHANGES: YES`; else `planner` → `dev` → `reviewer` (lite) | **3** |
+| **L** | Medium feature, needs plan, no external docs | `planner` → `dev` → `ux-intelligence` when `UI_CHANGES: YES`; else `planner` → `dev` → `reviewer` (lite). Clear collection scope (known screen + listing API): `perf-optimizer` (`LIST:y`) → `dev` → `reviewer` instead of planner. Ambiguous product scope keeps planner; dev then applies [list-surface-performance.md](../multi-agent-system/references/list-surface-performance.md) and the summary says the list specialist was skipped for the lite cap | **3** |
 | **L** | Medium feature + MAS-04 P0 flags (`SEC:y`, `API:y`, `DEPS:y`, `TEST:y`) or P1 flags (`A11Y:y`, `I18N:y`) | Same as L with optional P0/P1 specialists per predicates — within tier cap; overflow skip per [token-rules.md](../multi-agent-system/protocol/token-rules.md) | **3** (specialists count toward cap) |
 | **L** | Medium feature + UI-from-Figma (`FIG:y`) | `planner` → `mas-figma` → `dev` → [`mas-visual-fidelity` when `VFID:y`] when cap allows; else skip + warn (recommend full `/mas`) | **3** (mas-figma / mas-visual-fidelity count toward cap) |
 | **L+** | Medium feature + UI-from-Figma (`FIG:y` + `VFID:y`) | optional `osint` → `brainstorm` → `planner` → `mas-figma` → `dev` → [`mas-visual-fidelity` when `VFID:y`] within cap | **4** (specialists count toward cap) |
@@ -127,10 +127,10 @@ Upgrade to full `/mas` when: PRD/API docs need Spec Reader, new module needs Arc
 
 ## S-Tier Perf Chain (Lite)
 
-Default for non-trivial performance symptoms:
+Default for non-trivial performance symptoms, including list pagination, page size, and list load time (`LIST:y`):
 
-1. `perf-optimizer` (`NEXT_AGENT: android-dev` | `general-dev`) → writes `.ai/context/optimizations/{TASK_ID}.md`
-2. `android-dev` | `general-dev` (`NEXT_AGENT: reviewer`) — reads optimization brief if present
+1. `perf-optimizer` (`NEXT_AGENT: android-dev` | `general-dev`) → writes `.ai/context/optimizations/{TASK_ID}.md` with **List Surface Decision** when `LIST:y`
+2. `android-dev` | `general-dev` (`NEXT_AGENT: reviewer`) — reads optimization brief if present; item UI stays frozen
 
 Variants:
 

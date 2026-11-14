@@ -7,23 +7,33 @@ Read the sections relevant to the handoff.
 
 Determine affected module(s) from changed file paths (e.g. `:app`, `:videoeditorsdk`).
 
+**Host mutex (MAS-10 v1.8.0):** Wrap every Gradle and `adb install*` command with `mas-host-exec` and handoff `TASK_ID`. Order: **host lock (when gated) → android-device-prep (Step 0) → Gradle/adb**. See [host-build-install-mutex.md](host-build-install-mutex.md). Reviewer evidence table should note mutex wait when commands blocked.
+
 **Minimum before Reviewer approval:**
 
+```powershell
+powershell -File skills/multi-agent-system/scripts/mas-host-exec.ps1 `
+  -TaskId <TASK_ID> -RepoRoot $PWD `
+  -ChildArgv @('./gradlew', ':<module>:compileDebugKotlin')
+```
+
 ```bash
-./gradlew :<module>:compileDebugKotlin
+./skills/multi-agent-system/scripts/mas-host-exec.sh \
+  --task-id <TASK_ID> --workspace "$(pwd)" \
+  -- ./gradlew :<module>:compileDebugKotlin
 ```
 
 **When UI, resources, manifest, or cross-module wiring changed:**
 
-```bash
-./gradlew :<module>:assembleDebug
+```powershell
+powershell -File skills/multi-agent-system/scripts/mas-host-exec.ps1 `
+  -TaskId <TASK_ID> -RepoRoot $PWD `
+  -ChildArgv @('./gradlew', ':<module>:assembleDebug')
 ```
 
 **When handoff touches multiple modules** — compile each affected module or run:
 
-```bash
-./gradlew assembleDebug
-```
+Use `mas-host-exec` with `-ChildArgv @('./gradlew', 'assembleDebug')` (same `-TaskId` / `-RepoRoot` pattern).
 
 Record exact command, exit code, and error summary. Build failure → **blocks approval**.
 

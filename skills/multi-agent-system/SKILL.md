@@ -334,10 +334,11 @@ Simulate real-user interaction and recommend behavioral fixes without visual red
 
 ## Performance Optimization
 
-Profile existing implementations for measurable production gains (Perf Optimizer agent):
+Profile existing implementations for measurable production gains (Perf Optimizer agent). The same agent is the list gate: pagination strategy, page size, load budget, and a faster list container with the item UI unchanged.
 
 - Skill: [mas-perf-optimizer/SKILL.md](../mas-perf-optimizer/SKILL.md)
 - Standards: [performance-optimization-standards.md](references/performance-optimization-standards.md)
+- Lists: [list-surface-performance.md](references/list-surface-performance.md)
 - Brief output: `.ai/context/optimizations/{TASK_ID}.md` — Dev reads on perf fix pass; Reviewer reads for Performance Verification
 
 ## Release Readiness

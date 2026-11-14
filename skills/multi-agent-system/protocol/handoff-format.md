@@ -367,13 +367,20 @@ SCOPE:
 METRICS: <baseline numbers or unknown>
 FILES:
 * seed paths (optional)
+LIST_SURFACE: true | false
+LIST_KIND: feed | search | catalog | history | grid | inbox | other
+API_HINT: <endpoint or unknown>
+PAGE_SIZE_CURRENT: <n | none | unknown>
+ITEM_LAYOUT: <item composable, XML, or row path>
 ANALYZE_ONLY: true | false
 DELIVERABLE: Brief at .ai/context/optimizations/{TASK_ID}.md
-NEXT_AGENT: android-dev | general-dev | none
+NEXT_AGENT: android-dev | general-dev | test-strategy | none
 DONE
 ```
 
 `ANALYZE_ONLY: false` (default) → `NEXT_AGENT: android-dev` | `general-dev` (platform from `project.md` or stack detection). `ANALYZE_ONLY: true` → `NEXT_AGENT: none`.
+
+**List gate:** set `LIST_SURFACE: true` for a collection screen or listing API. Omit the optional list lines when `LIST_SURFACE` is false. Feature chains use `NEXT_AGENT: test-strategy` so tests lock the page size; symptom-only tuning uses dev. Standards: [list-surface-performance.md](../references/list-surface-performance.md). Item UI stays frozen — pagination, limit, and container swap only.
 
 ### Coordinator → Release Readiness Handoff
 

@@ -27,6 +27,7 @@ Veteran-level implementation (10+ years equivalent). Read [android-veteran-stand
 - On UX fix pass: implement ranked P0/P1 **behavioral fixes only** from UX brief; reject cosmetic/layout items per [ux-intelligence-standards.md](../multi-agent-system/references/ux-intelligence-standards.md); do not expand scope beyond brief + handoff.
 - If brief empty or no fixes, proceed as normal dev completion.
 - On perf fix pass: cite finding `#` in output; may skip LOW confidence items with rationale; note `PERF_FIXES_APPLIED:` summary for Documenter/Reviewer.
+- On a list surface: implement the brief’s page size, paging config, and container swap only. Do not restyle the item composable or item XML. See [list-surface-performance.md](../multi-agent-system/references/list-surface-performance.md).
 - On release fix pass: implement P0/P1 failures from release brief in **Priority Order**; cite category ID in output; scope lock to brief + `FAILURE_CATEGORIES`; reject out-of-scope feature requests.
 - On test strategy pass: implement P0/P1 tests from brief; document skip rationale for Tests to Skip; apply flaky mitigations; cite test `#` in `## Tests` output; do not expand scope beyond brief + handoff.
 
@@ -38,7 +39,7 @@ Spawned by Coordinator via **Task** (`generalPurpose`, foreground). Read [subage
 
 1. Read handoff at `.ai/handoffs/{TASK_ID}.md`.
 2. When handoff includes `UX_BRIEF` or `.ai/context/ux-reviews/{TASK_ID}.md` exists, read UX brief first — implement P0/P1 behavioral fixes only; reject cosmetic/layout items per [ux-intelligence-standards.md](../multi-agent-system/references/ux-intelligence-standards.md).
-3. When `.ai/context/optimizations/{TASK_ID}.md` exists, read optimization brief — implement findings in **Priority Order**; preserve behavior/UI unless brief `Significant-Gain Exceptions` covers the change; reject feature requests from brief.
+3. When `.ai/context/optimizations/{TASK_ID}.md` exists, read optimization brief — implement findings in **Priority Order**; preserve behavior/UI unless brief `Significant-Gain Exceptions` covers the change; reject feature requests from brief. When the brief has **List Surface Decision**, read [list-surface-performance.md](../multi-agent-system/references/list-surface-performance.md) and treat that table as the lock (page size, `initialLoadSize`, prefetch, container, frozen item path).
 4. When `.ai/context/release-readiness/{TASK_ID}.md` exists (or handoff `RELEASE_BRIEF`), read release brief — implement failures in **Priority Order** (P0 before P1); scope lock to brief items + `FAILURE_CATEGORIES`; cite category ID in output; reject out-of-scope feature requests from brief.
 5. When `.ai/context/osint/{TASK_ID}.md` exists, read OSINT brief — implement from `Implementation Guidance` and `Priority Order`; **never copy OSS code verbatim**; cite pattern source in comments only when standards allow; reject `avoid`-rated patterns unless handoff overrides.
 6. When `.ai/context/test-strategies/{TASK_ID}.md` exists (or handoff `TEST_STRATEGY_BRIEF`), read test strategy brief — implement P0/P1 tests; document skip rationale for Tests to Skip; apply flaky mitigations; test strategy governs test files (optimization brief governs prod code when both present).
@@ -78,6 +79,17 @@ When `.ai/context/optimizations/{TASK_ID}.md` exists:
 - Reject feature requests from brief — note out-of-scope, do not implement
 - If brief missing, proceed normally
 
+### List surface lock
+
+When the brief contains **List Surface Decision** (or handoff `LIST_SURFACE: true` / `LIST:y`):
+
+- Use the decided pagination, page size, and request param. For Paging 3 set `initialLoadSize` to that page size (do not keep the 3× default) and `prefetchDistance` from the brief.
+- Swap only the container named in the brief (`LazyColumn` / `LazyVerticalGrid` / `RecyclerView` / `ListAdapter`). The item composable or item XML path in **Item UI frozen** gets no visual edit.
+- Allowed inside the item: pass a stable key, request the image at the existing slot size, or `remember` a value that does not move pixels.
+- Do not add a skeleton, footer, or filter the screen does not already have.
+- If Architect named a different limit, the brief wins unless Architect cited a hard API maximum — then use that maximum and say so in `PERF_FIXES_APPLIED`.
+- If this task is a collection and **no** optimization brief exists (lite cap skipped the specialist), read [list-surface-performance.md](../multi-agent-system/references/list-surface-performance.md), apply it, and write the same decision table into **Perf Fixes Applied** so Reviewer can check it.
+
 ## Release Brief
 
 When `.ai/context/release-readiness/{TASK_ID}.md` exists (or handoff `RELEASE_BRIEF`):
@@ -99,7 +111,7 @@ Before `DONE`, verify:
 - [ ] Lazy lists keyed; no main-thread blocking
 - [ ] Hilt modules/scopes correct; Repository boundary respected
 - [ ] Tests added for non-trivial ViewModel/repository logic — **run them**
-- [ ] **Gradle compile** on affected module(s): `./gradlew :<module>:compileDebugKotlin` — fix errors
+- [ ] **Gradle compile** on affected module(s) via **`mas-host-exec`** + `TASK_ID`: `-ChildArgv @('./gradlew', ':<module>:compileDebugKotlin')` — fix errors ([host-build-install-mutex.md](../multi-agent-system/references/host-build-install-mutex.md))
 - [ ] **Visual intent documented** — how UI should look across phone, fontScale, landscape (see Visual Notes)
 - [ ] **Launch Recipe documented** when Capture Recipe uses `connected-device` — `LAUNCH:` block in handoff (package, deeplink-uri or activity, `post-launch-wait-ms`); `ADB_SERIAL` when multi-device; debug APK install command (`./gradlew installDebug`) if needed
 - [ ] ReadLints on all changed files — fix errors introduced

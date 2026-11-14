@@ -1,5 +1,6 @@
 ﻿{
     "version":  1,
+    "_optional_p1_preToolUse_masHostLock":  "Uncomment preToolUse entry in hooks.json to warn on unwrapped gradlew/adb install (fail-open). See hooks/mas-host-lock-warn.ps1 and host-build-install-mutex.md.",
     "hooks":  {
                   "subagentStop":  [
                                        {

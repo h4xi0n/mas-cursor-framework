@@ -38,6 +38,7 @@ Read sections relevant to the handoff — do not load entire file into chat outp
 
 - Stable parameters; avoid passing unstable lambdas — use method references or `remember`.
 - Keys on `LazyColumn`/`LazyRow` items; use `items(key = {})`.
+- Collection screens and listing APIs: [list-surface-performance.md](list-surface-performance.md). Paginate unbounded lists, set an explicit page size, and set Paging `initialLoadSize` to that page size. Speed comes from the container and the request, not from editing the row layout.
 - Avoid heavy work in `@Composable`; use `remember` or ViewModel.
 - Prefer `Modifier` chains in correct order: size → layout → drawing → pointer.
 - Use `Lazy*` layouts for lists; never `Column` + `forEach` for long lists.

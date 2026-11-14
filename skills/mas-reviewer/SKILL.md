@@ -82,6 +82,7 @@ If any criterion fails → `Issue Resolved: NO` and `Approved: NO`; list what Bu
 2. Verify dev output states what should improve (startup ms, frame time, memory, etc.).
 3. Confirm no behavior regression — existing functional paths still correct.
 4. Build and tests pass (unchanged gates).
+5. When the brief has **List Surface Decision**, also confirm: first request uses that page size (Paging `initialLoadSize` included), strategy matches, container matches, and the frozen item file has no visual diff. Any miss → `Verified: NO`. Standards: [list-surface-performance.md](../multi-agent-system/references/list-surface-performance.md).
 
 Include in output:
 
@@ -90,6 +91,7 @@ Include in output:
 
 Baseline: <from METRICS or brief> | unknown
 Expected: <from brief Expected Improvement>
+List: N/A | page size <n> matched, item UI frozen | FAIL — <what drifted>
 Verified: YES | NO | N/A (manual/profiler required — <rationale>)
 ```
 
@@ -319,13 +321,13 @@ On every modified or new file:
 
 ### 3. Gradle Build & Tests (Android — mandatory unless docs-only)
 
-Read [build-test-visual-qa.md](../multi-agent-system/references/build-test-visual-qa.md).
+Read [build-test-visual-qa.md](../multi-agent-system/references/build-test-visual-qa.md) and [host-build-install-mutex.md](../multi-agent-system/references/host-build-install-mutex.md).
 
 **Build** — run for every Android review with code changes:
 
 1. Identify affected Gradle module(s) from `FILES`.
-2. Run `./gradlew :<module>:compileDebugKotlin` minimum; `assembleDebug` if UI/resources/manifest/DI graph changed.
-3. Record command, exit code, and failure summary.
+2. Run compile/assemble via **`mas-host-exec`** with handoff `TASK_ID` (MAS-10), e.g. `-ChildArgv @('./gradlew', ':<module>:compileDebugKotlin')`; `assembleDebug` if UI/resources/manifest/DI graph changed.
+3. Record command, exit code, mutex wait (if any), and failure summary.
 
 **Tests** — run when logic, ViewModel, repository, or export pipeline changed:
 
@@ -485,6 +487,7 @@ Issue Resolved: YES | NO
 
 Baseline: <from METRICS or brief> | unknown
 Expected: <from brief Expected Improvement>
+List: N/A | page size <n> matched, item UI frozen | FAIL — <what drifted>
 Verified: YES | NO | N/A (manual/profiler required — <rationale>)
 
 ## OSS Alignment:

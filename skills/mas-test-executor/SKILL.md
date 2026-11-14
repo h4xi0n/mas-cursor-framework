@@ -97,10 +97,11 @@ See [device-log-capture.md](../multi-agent-system/references/device-log-capture.
 ### Step 1+ — Execute commands
 
 1. Load P0/P1 commands from test-strategy brief; honor **Tests to Skip** with documented rationale in Gaps.
-2. Execute commands via shell — bounded attempts; no unbounded flaky retry. P0 `connected*AndroidTest`: `block_until_ms` ≥ 600000 (10 min).
-3. Record exit codes, failure snippets, and flaky notes per command.
-4. On failures → document in Failures section; Coordinator routes to **bug-fix** (executor does not patch).
-5. **Post dump (MAS-09):** When `LOG_CAPTURE: yes` and repro occurred after Step 0b:
+2. Execute commands via shell — **wrap Gradle / `adb install*` with `mas-host-exec`** and handoff `TASK_ID` per [host-build-install-mutex.md](../multi-agent-system/references/host-build-install-mutex.md). Set `MAS_HOST_LOCK=skip` only when brief/fixture explicitly allows.
+3. Bounded attempts; no unbounded flaky retry. P0 `connected*AndroidTest`: `block_until_ms` ≥ 600000 (10 min).
+4. Record exit codes, failure snippets, and flaky notes per command.
+5. On failures → document in Failures section; Coordinator routes to **bug-fix** (executor does not patch).
+6. **Post dump (MAS-09):** When `LOG_CAPTURE: yes` and repro occurred after Step 0b:
 
 ```powershell
 powershell -File skills/multi-agent-system/scripts/capture-device-logs.ps1 `
@@ -109,7 +110,7 @@ powershell -File skills/multi-agent-system/scripts/capture-device-logs.ps1 `
 
 Parse stdout JSON; populate test-run **Device Logs** section per [brief-schemas.md](../multi-agent-system/protocol/brief-schemas.md).
 
-6. Write brief file (create `test-runs/` if missing); return output template.
+7. Write brief file (create `test-runs/` if missing); return output template.
 
 ## Output
 
