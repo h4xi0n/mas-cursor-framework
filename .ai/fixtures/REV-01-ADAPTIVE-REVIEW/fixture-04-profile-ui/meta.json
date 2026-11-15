@@ -1,0 +1,9 @@
+{
+  "fixture_id": "fixture-04-profile-ui",
+  "description": "Compose screen lacking sealed UiState and error state handling",
+  "review_profile": "ui",
+  "expected_stage": "Stage 2 / Stage 3",
+  "expected_finding": "MAJOR-01",
+  "expected_domain": "VisualQA",
+  "expected_verdict": "Approved: NO"
+}

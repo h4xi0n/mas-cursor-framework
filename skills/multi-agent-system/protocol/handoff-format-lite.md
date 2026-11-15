@@ -19,6 +19,7 @@ CONTEXT:
 FILES:
 * path
 UI_CHANGES: YES | NO
+RP: lite | bugfix | ui | backend | infra | genai | refactor | feature # optional REVIEW_PROFILE
 REVIEWER_MODE: lite
 NEXT_AGENT: <none|reviewer>
 DONE
@@ -32,6 +33,7 @@ DONE
 | `BRIEF_PATH:` | `BP:` | `BP: .ai/context/osint/MAS-01.md` |
 | `SECTIONS:` | `SEC:` | `SEC: Recommended, Logic Flow` |
 | `DEBATE_TRIGGER:` | `DT:` | `DT: reviewer-rejection-2` |
+| `REVIEW_PROFILE:` | `RP:` | `RP: bugfix` |
 | `SECURITY_AUDIT:` | `SEC:` | `SEC:y` (routing flag — see disambiguation below) |
 | `API_CONTRACT:` | `API:` | `API:y` |
 | `SUPPLY_CHAIN:` | `DEPS:` | `DEPS:y` |

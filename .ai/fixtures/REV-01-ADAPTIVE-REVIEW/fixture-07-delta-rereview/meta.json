@@ -1,0 +1,26 @@
+{
+  "fixture_id": "fixture-07-delta-rereview",
+  "description": "Delta re-review scenario (iteration 2) verifying that previous blockers are checked and untouched code cannot receive new blocking findings",
+  "review_scope": "delta-only",
+  "iteration": 2,
+  "previous_blockers": [
+    {
+      "id": "[MAJOR-01]",
+      "anchor": "AuthService.kt#L10-L15",
+      "summary": "Missing error handling on network call"
+    }
+  ],
+  "delta_changes": [
+    "AuthService.kt#L10-L20 (Remediated with try/catch Result wrapper)"
+  ],
+  "untouched_code": [
+    "AuthService.kt#L30-L40 (Legacy helper method)"
+  ],
+  "attempted_new_finding_on_untouched": {
+    "claim": "Legacy helper method on L35 should be refactored to use coroutines",
+    "anchor": "AuthService.kt#L35",
+    "expected_action": "FORCE_ADVISORY_OR_SUPPRESS",
+    "can_block_approval": false
+  },
+  "expected_verdict": "Approved: YES"
+}

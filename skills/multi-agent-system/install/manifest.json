@@ -1,7 +1,7 @@
 {
   "name": "mas-cursor-framework",
-  "version": "1.9.0",
-  "description": "Multi-Agent System for Cursor — skills, commands, rules, hooks",
+  "version": "2.0.0",
+  "description": "Multi-Agent System for Cursor — skills, commands, rules, hooks, and multi-stage adaptive review architecture",
   "skills": [
     "multi-agent-system",
     "mas",
@@ -43,6 +43,21 @@
   "rules": ["multi-agent-hybrid.mdc"],
   "hooks": ["mas-session-context.ps1", "mas-session-context.sh", "capture-device-logs-hook.ps1", "capture-device-logs-hook.sh", "mas-host-lock-warn.ps1", "mas-host-lock-warn.sh"],
   "docs": ["USER-RULE-MAS.md"],
+  "reviewStandards": [
+    "review-stage-gate.md",
+    "review-arbiter-standards.md",
+    "reviewer-lite.md"
+  ],
+  "reviewProfiles": [
+    "bugfix.md",
+    "ui.md",
+    "backend.md",
+    "infra.md",
+    "genai.md",
+    "feature.md",
+    "refactor.md",
+    "lite.md"
+  ],
   "hooksJson": {
     "sessionStart": "mas-session-context",
     "subagentStop": "mas-session-context"

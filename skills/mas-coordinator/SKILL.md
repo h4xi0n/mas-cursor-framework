@@ -475,6 +475,29 @@ Route to **Reviewer** when:
 - Validation requested
 - **Always after Bug Fix** — mandatory verification that the issue is fully resolved (Coordinator must not skip)
 
+## Reviewer Profile Resolution (Zero-Token Predicates)
+
+Coordinator resolves `REVIEW_PROFILE` for `mas-reviewer` using zero-token predicates evaluated in precedence order:
+
+| Precedence | Profile Slug | Trigger Condition (Deterministic Predicates) | Target Domain Focus | Active Profile Reference |
+|:---:|---|---|---|---|
+| **P0** | `bugfix` | Handoff contains `ORIGINAL_SYMPTOM`, `ROOT_CAUSE`, or `REPRO_STEPS`; or `bug-fix` in chain. | Root cause depth, repro verification, regression test presence, no symptom masking. | `references/review-profiles/bugfix.md` |
+| **P1** | `ui` | `UI_CHANGES: YES`, `design-specs/{TASK_ID}.md` exists, or changed files touch Compose/XML/CSS/layout. | Visual QA fidelity, design-spec schema, sealed UiState, touch targets $\ge 48\text{dp}$, responsive, a11y. | `references/review-profiles/ui.md` |
+| **P2** | `backend` | Files touch `server/`, `api/`, `db/`, `migrations/`, `entities/`, or `mas-backend-dev` in chain. | Clean architecture, forward-only DB migrations, SQL parameterization, idempotency keys, RBAC auth. | `references/review-profiles/backend.md` |
+| **P3** | `infra` | Files touch `Dockerfile`, `.github/`, `k8s/`, `terraform/`, `scripts/`, or `mas-devops` in chain. | Rootless containers, 40-char pinned commit SHAs, zero secret leaks, health probes (`/healthz`). | `references/review-profiles/infra.md` |
+| **P4** | `genai` | `.ai/context/genai/{TASK_ID}.md` exists, or files touch LLM clients, prompt templates, RAG retrievers. | XML prompt tags, strict tool JSON schemas, on-device $\ge 6\text{GB}$ RAM guards, eval metrics. | `references/review-profiles/genai.md` |
+| **P5** | `refactor` | `.ai/context/optimizations/{TASK_ID}.md` exists or handoff scope notes refactor/performance. | Behavioral invariance, zero contract drift, performance budgets, list paging, test suite parity. | `references/review-profiles/refactor.md` |
+| **P6** | `feature` | Default full `/mas` workflow; multi-tier implementation; standard greenfield feature. | PRD acceptance, 20-point edge cases, architectural layering, similar flow consistency, KDoc. | `references/review-profiles/feature.md` |
+| **—** | `lite` | `MODE: LITE` or `REVIEWER_MODE: lite` in handoff. | Minimal single-turn mechanical check + one-line visual/perf/test check. | `references/reviewer-lite.md` |
+
+### Composite Profiles
+When a feature touches multiple domains (e.g. mobile UI calling a backend API with GenAI streaming), Coordinator emits a composite profile string:
+```text
+REVIEW_PROFILE: feature (secondary: backend, genai)
+```
+The Reviewer evaluates the primary profile plus the specific checklist sections from secondary profile references under `### Secondary Audit: <domain>`.
+
+
 ## Dev / Bug Fix → UX Intelligence → Documenter → Reviewer Chain (Mandatory)
 
 When Android Dev or General Dev completes with changed source files:
@@ -694,6 +717,19 @@ On Reviewer `Approved: NO` or `Issue Resolved: NO`:
 3. **Loop 2** (`reviewer_loop_count == 2` and `debate_used == false`): Task to **debate-synthesizer** (`TARGET_AGENT: debate-synthesizer`, `DEBATE_TRIGGER: reviewer-rejection-2`, `MODEL_CLASS: thinking`). Set `debate_used: true` after debate returns. Then Task to **bug-fix** with debate brief path.
 4. **Cap** (`reviewer_loop_count >= MAX_REVIEWER_LOOPS` after debate): **user escalation** — no third auto-retry. Message includes paths to Reviewer output and `.ai/context/debates/{TASK_ID}.md` if present.
 5. Re-record workflow step on re-spawn (replaces same agent step per workflow-usage-policy).
+
+### Delta-Only Re-Review Protocol (Iteration 2+)
+When routing back to Reviewer on iteration 2+:
+1. Coordinator injects re-review scope and previous blockers into handoff:
+   ```markdown
+   REVIEW_SCOPE: delta-only
+   REVIEW_ITERATION: 2
+   PREVIOUS_BLOCKERS:
+     - ID: [MAJOR-01]
+       Anchor: path/to/File.kt#Lxx-Lyy
+       Summary: <blocker summary>
+   ```
+2. **Boundary Invariant:** The Reviewer evaluates **only** whether `PREVIOUS_BLOCKERS` are remediated and checks for regression deltas on changed lines. Prohibiting new blockers on code unchanged since iteration 1 is strictly enforced.
 
 Constants: [token-rules.md](../multi-agent-system/protocol/token-rules.md) — `MAX_REVIEWER_LOOPS=2`, `MAX_DEBATE_SESSIONS_PER_TASK=1`.
 

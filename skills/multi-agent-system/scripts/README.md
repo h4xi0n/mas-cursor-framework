@@ -252,6 +252,30 @@ See `.ai/fixtures/MAS-10-HOST-LOCK/README.md`
 | 21 | LOCK_HELD | Release refused |
 | 22 | LOCK_STALE_BREAK_FAILED | break-stale refused |
 
+## update-github-repository-metadata (REPO-01)
+
+Synchronizes GitHub repository description ($\le 350$ chars), homepage, and 20 curated topics from `.github/repository-metadata.json` using GitHub CLI (`gh`) or GitHub REST API (`Invoke-RestMethod`).
+
+| Script | Platform |
+|--------|----------|
+| `update-github-repository-metadata.ps1` | Windows (PowerShell) / Cross-platform PowerShell Core |
+
+### Quick start
+
+```powershell
+# Validate metadata file without making API calls
+powershell -File skills/multi-agent-system/scripts/update-github-repository-metadata.ps1 -ValidateOnly
+
+# Dry-run preview of API payloads
+powershell -File skills/multi-agent-system/scripts/update-github-repository-metadata.ps1 -DryRun
+
+# Apply metadata with personal access token
+powershell -File skills/multi-agent-system/scripts/update-github-repository-metadata.ps1 -Token $env:GITHUB_TOKEN
+
+# Apply alternative description (e.g., developer_centric)
+powershell -File skills/multi-agent-system/scripts/update-github-repository-metadata.ps1 -DescriptionKey developer_centric
+```
+
 ## Other scripts
 
 See individual script header comments for `init-workflow-session`, `record-workflow-step`, `finalize-workflow-usage`, and context maintenance utilities.

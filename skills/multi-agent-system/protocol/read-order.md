@@ -34,7 +34,7 @@ Beyond base context and handoff `BRIEF_PATH` / `SECTIONS:` slice:
 | mas-figma | osint, architecture, plans for `{TASK_ID}`; handoff `SOURCES_HINT` / `FILES` (Figma URL/node-id) |
 | mas-visual-fidelity | design-specs (all sections + Verification Contract incl. Launch Recipe / Device Target when tier 3), plans for `{TASK_ID}`; dev handoff `FILES`, `LAUNCH:` block, `DEVICE_CAPTURE`, `ADB_SERIAL`; test-strategies visual capture commands slice; [scripts/README.md](../scripts/README.md) when Capture Recipe = `connected-device` |
 | bug-fix | above + `debates/{TASK_ID}.md` when `DEBATE_TRIGGER` or debate brief exists |
-| reviewer | all `{TASK_ID}` briefs in context dirs (including `genai/`, `prds/`, `devops/`) + handoff `FILES`; **`visual-qa/{TASK_ID}.md` at step 0k**; `genai-spec` at step 0l; `prd` at step 0m; backend at step 0n; `devops` at step 0o |
+| reviewer | handoff `FILES` + base context; Stage 1 standards (`review-stage-gate.md`); Stage 2 selected profile (`review-profiles/{profile}.md`); Stage 3 arbiter standards (`review-arbiter-standards.md`); relevant `{TASK_ID}` briefs per active profile |
 | debate-synthesizer | reviewer output, prior `debates/{TASK_ID}.md`, handoff `FILES` |
 | token-auditor | `workflow-sessions/{TASK_ID}.json` only |
 | security-auditor | osint, architecture, plans for `{TASK_ID}`; changed FILES from handoff |

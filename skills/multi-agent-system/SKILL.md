@@ -1,6 +1,6 @@
 ---
 name: multi-agent-system
-description: Full multi-agent orchestration (internal entry). Users should invoke /mas slash command or mas skill — not /multi-agent-system. Product Manager, Spec Reader, Brainstorm, Planner, Architect, GenAI, Figma, Test Strategy, Backend Dev, Android Dev, General Dev, DevOps, UX Intelligence, OSINT, Imaginer, Perf Optimizer, Release Readiness, P0 audit quartet (security-auditor, dependency-risk, api-contract, test-executor), P1 depth trio (a11y, i18n, compliance), Visual Fidelity, Documenter, Bug Fix, Reviewer, Commit. Low token: /mas-lite.
+description: Full multi-agent orchestration (internal entry). Users should invoke /mas slash command or mas skill — not /multi-agent-system. Product Manager, Spec Reader, Brainstorm, Planner, Architect, GenAI, Figma, Test Strategy, Backend Dev, Android Dev, General Dev, DevOps, UX Intelligence, OSINT, Imaginer, Perf Optimizer, Release Readiness, P0 audit quartet (security-auditor, dependency-risk, api-contract, test-executor), P1 depth trio (a11y, i18n, compliance), Visual Fidelity, Documenter, Bug Fix, Reviewer (v2.0.0 multi-stage adaptive), Commit. Low token: /mas-lite.
 ---
 
 # Multi-Agent System
@@ -390,13 +390,15 @@ flowchart TD
 - **Design Mode** (`MODEL_CLASS: thinking`): Emits `.ai/context/genai/{TASK_ID}.md` (`genai-spec` brief). Defines system prompts with XML tag hierarchy, strict JSON tool schemas (`additionalProperties: false`), RAG chunking and caching, on-device SLM RAM guard requirements, safety guardrails (OWASP LLM Top 10), and evaluation metrics (`DeepEval` RAG triad, `promptfoo` assertions). Never writes code.
 - **Dev Mode** (`MODEL_CLASS: normal`): Implements client/gateway code (MediaPipe Tasks GenAI on Android with Coroutines Flow streaming, LiteLLM gateway proxy with fallback cascades), wires prompt prefix caching, and writes/runs automated eval test suites.
 
-### Reviewer Gate Additions (Steps 0l–0o)
+## Multi-Stage Adaptive Review Architecture (v2.0.0)
 
-`mas-reviewer` remains the sole merging authority (`Approved: YES | NO`) and verifies:
-- **0l. GenAI Spec & Evals**: Prompt XML hierarchy, JSON Schema strictness, on-device RAM guard ($\ge 6\text{ GB}$), eval thresholds (Faithfulness $\ge 0.85$, Relevancy $\ge 0.85$, Recall $\ge 0.80$, Hallucination $\le 0.10$).
-- **0m. PRD Alignment**: Gherkin scenario coverage, zero P1/P2 scope creep, NFR budgets.
-- **0n. Backend Architecture**: Clean layering (Domain $\leftrightarrow$ Repo $\leftrightarrow$ DataSource), versioned forward-only migrations, parameterized SQL, idempotency keys, auth.
-- **0o. DevOps Infrastructure**: Multi-stage non-root containers, pinned action SHAs, complete `.env.example`, `/healthz` and `/readyz` probes.
+`mas-reviewer` remains the sole framework merge authority (`Approved: YES | NO`) operating a disciplined 3-stage review lifecycle:
+1. **Stage 1: Deterministic Mechanical Gate ([review-stage-gate.md](references/review-stage-gate.md))**  
+   Executes deterministic tools (`ReadLints`, build compilation via `mas-host-exec`, unit tests via `mas-host-exec`, and secret scanning). Any failure trips the **Fast-Fail Circuit Breaker**, terminating review immediately with `Approved: NO` and raw diagnostics, saving $\ge 75\%$ tokens on broken diffs.
+2. **Stage 2: Situation-Adaptive Domain Deep-Dive ([review-profiles/](references/review-profiles/))**  
+   Dynamically loads modular domain profiles (`bugfix.md`, `ui.md`, `backend.md`, `infra.md`, `genai.md`, `feature.md`, `refactor.md`, and `reviewer-lite.md`) resolved via zero-token Coordinator predicates, eliminating checklist bloat. Supports composite profiles (e.g. `feature (secondary: backend)`).
+3. **Stage 3: Arbiter Synthesis & Quality Gate ([review-arbiter-standards.md](references/review-arbiter-standards.md))**  
+   Synthesizes findings under an Evidence Anchor Contract (`path/to/File.ext#Lxx-Lyy` + trigger scenario), enforces the 4-Rule False-Positive Suppression Filter (suppressing phantom NPE claims, compiler hallucinations, and unanchored style nits), generates actionable drop-in code remediations, and enforces the Delta-Only Re-Review Protocol on iteration 2+.
 
 ## Protocol Files
 
@@ -406,6 +408,9 @@ flowchart TD
 - [brief-schemas.md](protocol/brief-schemas.md) — required brief sections
 - [subagent-spawn.md](protocol/subagent-spawn.md) — Task tool spawn rules (Coordinator)
 - [subagent-role.md](protocol/subagent-role.md) — specialist subagent behavior
+- [review-stage-gate.md](references/review-stage-gate.md) — Stage 1 deterministic mechanical gate
+- [review-arbiter-standards.md](references/review-arbiter-standards.md) — Stage 3 arbiter synthesis & false-positive filter
+- [review-profiles/](references/review-profiles/) — Stage 2 domain verification profiles
 - [reviewer-lite.md](references/reviewer-lite.md) — lite Reviewer only
 - [read-order.md](protocol/read-order.md) — subscription matrix
 - [token-rules.md](protocol/token-rules.md) — caps and artifact-forward

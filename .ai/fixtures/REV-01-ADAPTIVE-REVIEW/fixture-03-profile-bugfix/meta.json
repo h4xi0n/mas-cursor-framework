@@ -1,0 +1,10 @@
+{
+  "fixture_id": "fixture-03-profile-bugfix",
+  "description": "Bug fix implementation that fixes the symptom but lacks an automated regression test",
+  "review_profile": "bugfix",
+  "expected_stage": "Stage 2 / Stage 3",
+  "expected_finding": "MAJOR-01",
+  "expected_domain": "RootCause",
+  "expected_verdict": "Approved: NO",
+  "expected_issue_resolved": "NO"
+}

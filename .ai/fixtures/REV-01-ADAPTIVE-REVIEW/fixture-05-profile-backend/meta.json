@@ -1,0 +1,9 @@
+{
+  "fixture_id": "fixture-05-profile-backend",
+  "description": "Backend repository constructing raw SQL query via string interpolation",
+  "review_profile": "backend",
+  "expected_stage": "Stage 2 / Stage 3",
+  "expected_finding": "CRITICAL-01",
+  "expected_domain": "Security",
+  "expected_verdict": "Approved: NO"
+}

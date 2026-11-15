@@ -25,6 +25,10 @@ FILES:
 MODULES:
 * :app (optional, Android)
 UI_CHANGES: YES | NO
+REVIEW_PROFILE: bugfix | ui | backend | infra | genai | refactor | feature  # optional; resolved via zero-token predicates
+REVIEW_SCOPE: full | delta-only             # optional; delta-only on re-review iteration 2+
+PREVIOUS_BLOCKERS:                          # optional; required on delta-only re-reviews
+* ID: [MAJOR-01], Anchor: path#Lxx-Lyy, Summary: ...
 DELIVERABLE: <expected result>
 NEXT_AGENT: <agent or none>
 DONE
@@ -647,6 +651,7 @@ Required after every Bug Fix completion. `NEXT_AGENT` on Bug Fix handoff must be
 ```
 TASK_ID: <id>
 TARGET_AGENT: reviewer
+REVIEW_PROFILE: bugfix
 GOAL: Verify bug is perfectly resolved.
 ORIGINAL_SYMPTOM: <user report or stack trace>
 ROOT_CAUSE: <from Bug Fix>
@@ -658,7 +663,28 @@ FILES:
 UI_CHANGES: YES | NO
 MODULES:
 * :app
-DELIVERABLE: Bug Resolution Verification + Build & Tests + Visual QA if UI
+DELIVERABLE: Bug Resolution Verification + Stage 1 Gate + Stage 3 Arbiter Verdict
+NEXT_AGENT: none
+DONE
+```
+
+### Delta-Only Re-Review Handoff (Coordinator → Reviewer, Iteration 2+)
+
+Required when routing back to Reviewer after an `Approved: NO` iteration:
+
+```
+TASK_ID: <id>
+TARGET_AGENT: reviewer
+REVIEW_PROFILE: <same as iteration 1>
+REVIEW_SCOPE: delta-only
+REVIEW_ITERATION: 2
+PREVIOUS_BLOCKERS:
+  - ID: [MAJOR-01]
+    Anchor: core/src/data/Repository.kt#L45-L52
+    Summary: Missing SQL parameterization in query
+FILES:
+* updated modified paths
+DELIVERABLE: Delta Re-Review Verification + Stage 1 Gate + Stage 3 Arbiter Verdict
 NEXT_AGENT: none
 DONE
 ```
@@ -1325,45 +1351,54 @@ DONE
 Handoff in: `FILES`, `CHANGE_SUMMARY`, `PUBLIC_API: YES | NO`.  
 Handoff out: `NEXT_AGENT: reviewer`.
 
-### Reviewer
+### Reviewer (v2.0.0 Multi-Stage Adaptive)
 
 ```
-## Findings
+## Stage 1: Mechanical Gate Results
 
-## Bug Resolution Verification:
+| Check | Tool / Command | Exit Code | Result | Diagnostics |
+|-------|----------------|-----------|--------|-------------|
+| Static Linter | ReadLints (FILES) | 0 | PASS | Clean |
+| Compilation | mas-host-exec <build> | 0 | PASS | Build successful |
+| Unit Tests | mas-host-exec <test> | 0 | PASS | Tests passed |
+| Secret Scan | Diff regex scan | 0 | PASS | Clean |
 
-<required after Bug Fix; N/A otherwise>
+Stage 1 Gate Status: PASS (Proceed to Stage 2)
 
-## Implementation Walkthrough:
+## Stage 2: Domain Deep-Dive (Profile: <profile>)
 
-## Lint:
+<Profile-specific checklist table from references/review-profiles/<profile>.md>
 
-## Build & Tests:
+## Stage 3: Arbiter Synthesis
 
-## Visual QA (Imagined):
+### Findings
 
-## Similar Flow Comparison:
+#### [<CRITICAL-01 | MAJOR-01 | ADVISORY-01>] <Title>
+- **Domain:** <RootCause | Security | Concurrency | Migration | VisualQA | Contract | Architecture>
+- **Confidence:** HIGH | MEDIUM | LOW
+- **Anchor:** <path/to/File.ext#Lstart-Lend>
+- **Defect Description:** <concrete explanation>
+- **Reproducing Scenario / Trigger:** <trigger sequence>
+- **Actionable Remediation:**
+```<lang>
+<drop-in fix snippet or command>
+```
 
-## Android Veteran Review:
-
-## Edge Cases:
-
-## Critical:
-
-## Major:
-
-## Minor:
+<If delta re-review: include ## Delta Re-Review Verification table>
 
 Approved:
 YES | NO
 
 ## Daily Summary
-
 <one line, ≤120 chars — only when FILES non-empty; Coordinator prefers this for changelog append>
 
 ## Memory Update
-
 <optional>
+
+## Usage Report
+Model: <slug|default>
+Class: normal|fast|thinking
+Tokens: <in>/<out> | unknown
 
 DONE
 ```

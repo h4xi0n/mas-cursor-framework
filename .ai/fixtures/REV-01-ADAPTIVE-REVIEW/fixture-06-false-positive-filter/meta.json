@@ -1,0 +1,22 @@
+{
+  "fixture_id": "fixture-06-false-positive-filter",
+  "description": "Candidate findings containing a non-null type NPE hallucination and a stylistic naming comment",
+  "raw_proposals": [
+    {
+      "claim": "User name property could be null causing NPE at runtime",
+      "anchor": "UserProfile.kt#L12",
+      "target_type": "kotlin.String (non-nullable)",
+      "expected_filter_rule": "Rule 2 (Type-System Invariance)",
+      "expected_action": "DISCARD"
+    },
+    {
+      "claim": "Variable name 'idx' should be renamed to 'userIndex' for clarity",
+      "anchor": "UserProfile.kt#L25",
+      "expected_filter_rule": "Rule 4 (Style vs Correctness)",
+      "expected_action": "FORCE_ADVISORY"
+    }
+  ],
+  "expected_final_critical_count": 0,
+  "expected_final_major_count": 0,
+  "expected_verdict": "Approved: YES"
+}

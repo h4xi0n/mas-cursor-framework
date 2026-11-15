@@ -1,0 +1,8 @@
+{
+  "fixture_id": "fixture-02-fastfail-lint",
+  "description": "Static linter violation fixture (unused symbol / syntax error) verifying Stage 1 circuit breaker halts execution",
+  "expected_stage": "Stage 1",
+  "expected_gate_status": "FAIL",
+  "expected_verdict": "Approved: NO",
+  "expected_circuit_breaker_tripped": true
+}
