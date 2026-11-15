@@ -44,8 +44,12 @@ Spawned by Coordinator via **Task** (`generalPurpose`, foreground). Read [subage
 14. When `.ai/context/design-specs/{TASK_ID}.md` exists — run **Design-Spec Verification** (step 0j): verify all seven required sections per [brief-schemas.md](../multi-agent-system/protocol/brief-schemas.md); flag missing Node Map / tokens / screenshot; note reuse-table gaps and inspect-first violations (monolithic Layout Spec); do **not** re-extract.
 15. When `.ai/context/visual-qa/{TASK_ID}.md` exists — run **Design-Fidelity Verification** (step 0k): consume visual-qa brief only; no Figma MCP re-fetch or re-capture. When design-spec exists without visual-qa, Layout/Typography/Color/Spacing imagined rows → **N/A** per [build-test-visual-qa.md](../multi-agent-system/references/build-test-visual-qa.md).
 16. When handoff notes release fix chain (`RELEASE_BRIEF`, `FAILURE_CATEGORIES`, or `CONTEXT` release workflow), read `.ai/context/release-readiness/{TASK_ID}.md` when present — run **Release Readiness Verification** (step 0e).
-17. Validate deliverable briefs against [brief-schemas.md](../multi-agent-system/protocol/brief-schemas.md) — flag missing required sections in findings.
-18. If handoff type is **post-bugfix** (contains `ORIGINAL_SYMPTOM`, `ROOT_CAUSE`, or `REPRO_STEPS`) → run **Post-Bug Fix Verification** (step 0) before general review.
+17. When `.ai/context/genai/{TASK_ID}.md` exists — run **GenAI Specification & Evaluation Verification** (step 0l).
+18. When `.ai/context/prds/{TASK_ID}.md` exists — run **PRD & Requirements Alignment Verification** (step 0m).
+19. When backend code / database migrations exist in handoff `FILES` or scope — run **Backend Clean Architecture & Migration Verification** (step 0n).
+20. When `.ai/context/devops/{TASK_ID}.md` exists or platform files modified — run **Platform & DevOps Infrastructure Verification** (step 0o).
+21. Validate deliverable briefs against [brief-schemas.md](../multi-agent-system/protocol/brief-schemas.md) — flag missing required sections in findings.
+22. If handoff type is **post-bugfix** (contains `ORIGINAL_SYMPTOM`, `ROOT_CAUSE`, or `REPRO_STEPS`) → run **Post-Bug Fix Verification** (step 0) before general review.
 
 ## Review Workflow
 
@@ -300,6 +304,98 @@ Verified: PASS | FAIL | N/A
 ```
 
 Standards: [visual-fidelity-standards.md](../multi-agent-system/references/visual-fidelity-standards.md)
+
+### 0l. GenAI Specification & Evaluation Verification (when genai-spec brief exists)
+
+**Goal: confirm prompt architecture, tool schemas, safety guardrails, on-device guards, and eval thresholds.**
+
+1. Read `.ai/context/genai/{TASK_ID}.md` when present.
+2. Verify all seven required schema sections per [brief-schemas.md](../multi-agent-system/protocol/brief-schemas.md).
+3. Confirm prompt hierarchy uses standard XML tags (`<context>`, `<system_instructions>`, `<constraints>`, `<tools>`, `<output_schema>`) and few-shot exemplars.
+4. Verify JSON Schema tool definitions specify `additionalProperties: false` and required field arrays.
+5. Verify static prompt prefix caching directives/headers are configured for repetitive prompts exceeding minimum thresholds ($\ge 1024$ tokens for Claude, $\ge 32\text{k}$ for Gemini).
+6. For Android on-device SLMs: confirm explicit runtime RAM pre-flight check (`ActivityManager.MemoryInfo.totalMem >= 6GB`) before model loading, INT4 quantization, and background Coroutines Flow streaming.
+7. Verify evaluation harness scores satisfy thresholds: DeepEval RAG triad (Faithfulness $\ge 0.85$, Relevancy $\ge 0.85$, Recall $\ge 0.80$, Hallucination $\le 0.10$) and `promptfoo` assertions pass with zero regressions.
+
+Include in output when genai-spec exists:
+
+```
+## GenAI Verification (0l)
+
+Brief: `.ai/context/genai/{TASK_ID}.md`
+Prompt XML Hierarchy: PASS | FAIL — <details>
+JSON Tool Schemas: PASS (strict draft-07) | FAIL — <untyped fields>
+On-Device RAM Guard: PASS (>= 6GB check enforced) | N/A | FAIL — <missing guard>
+Eval Metrics: PASS (Faithfulness: <score>, Relevancy: <score>) | FAIL — <below threshold>
+Verified: PASS | FAIL | N/A
+```
+
+### 0m. PRD & Requirements Alignment Verification (when prd brief exists)
+
+**Goal: confirm all functional user stories and acceptance criteria from PRD are implemented without scope creep.**
+
+1. Read `.ai/context/prds/{TASK_ID}.md` when present.
+2. Verify all six required schema sections per [brief-schemas.md](../multi-agent-system/protocol/brief-schemas.md).
+3. Map each Gherkin Scenario in the PRD to corresponding implementation code and automated tests.
+4. Verify zero Out-of-Scope (Deferred P1/P2) feature creep in code changes.
+5. Confirm non-functional requirements (p95 latency budgets, offline fallbacks) are respected.
+
+Include in output when prd exists:
+
+```
+## PRD Alignment (0m)
+
+Brief: `.ai/context/prds/{TASK_ID}.md`
+User Stories Implemented: <count>/<total>
+Gherkin Acceptance Scenarios: ALL PASS | <failing scenarios>
+Scope Boundary Check: PASS (zero out-of-scope creep) | FAIL — <unauthorized additions>
+Verified: PASS | FAIL | N/A
+```
+
+### 0n. Backend Clean Architecture & Migration Verification (when backend code exists)
+
+**Goal: confirm server-side layering, forward-only database migration safety, parameterized queries, and idempotency.**
+
+1. Verify clean architectural separation: Domain models $\leftrightarrow$ Repository interfaces $\leftrightarrow$ Data Source implementations.
+2. Confirm database migrations are versioned, forward-only, and provide clean rollback paths; zero raw DDL strings in application runtime startup.
+3. Enforce parameterized queries across all database access; verify zero string interpolation in queries.
+4. Verify state-mutating endpoints enforce `Idempotency-Key` headers or upsert semantics.
+5. Verify authentication/authorization checks exist on all sensitive endpoints.
+
+Include in output when backend code exists:
+
+```
+## Backend Clean Architecture & Migration (0n)
+
+Layering Integrity: PASS (Domain <-> Repo <-> DataSource) | FAIL — <coupling>
+Database Migrations: PASS (versioned, forward-only) | FAIL — <destructive/unversioned>
+SQL Parameterization: PASS (zero raw string queries) | FAIL — <injection risk>
+Idempotency & Auth: PASS | FAIL — <missing headers/auth>
+Verified: PASS | FAIL | N/A
+```
+
+### 0o. Platform & DevOps Infrastructure Verification (when devops brief / infra files exist)
+
+**Goal: confirm containerization security, CI/CD pipeline hygiene, secret redaction, and runtime health probes.**
+
+1. Read `.ai/context/devops/{TASK_ID}.md` when present; verify required sections per [brief-schemas.md](../multi-agent-system/protocol/brief-schemas.md).
+2. Multi-stage Dockerfile: confirm builder stage $\rightarrow$ runtime stage; verify execution as unprivileged non-root user (`appuser:10001:10001`).
+3. GitHub Actions CI/CD: confirm all external actions are pinned to immutable 40-character commit SHAs; verify least-privilege `GITHUB_TOKEN` permissions.
+4. Environment variables: verify `.env.example` is complete; confirm zero hardcoded secrets or API keys in repository files.
+5. Health checks: verify `/healthz` (liveness) and `/readyz` (readiness) probe endpoints are configured.
+
+Include in output when devops brief or platform files exist:
+
+```
+## DevOps & Platform Verification (0o)
+
+Brief: `.ai/context/devops/{TASK_ID}.md` or N/A
+Container Security: PASS (non-root, multi-stage, slim base) | FAIL — <runs as root>
+CI/CD Action SHAs: PASS (pinned commits) | FAIL — <floating tags>
+Secret Redaction: PASS (zero secrets committed) | FAIL — <secret detected>
+Health Check Endpoints: PASS (/healthz, /readyz) | FAIL — <missing probes>
+Verified: PASS | FAIL | N/A
+```
 
 ### 1. Imagine the Implementation
 
@@ -564,6 +660,48 @@ Brief: `.ai/context/release-readiness/{TASK_ID}.md` or N/A
 Categories addressed: <list>
 Re-check: PASS | FAIL | PARTIAL (<rationale>)
 Release Ready: YES | NO
+
+## GenAI Verification:
+
+<only when genai-spec brief exists; otherwise "N/A">
+
+Brief: `.ai/context/genai/{TASK_ID}.md`
+Prompt XML Hierarchy: PASS | FAIL — <details>
+JSON Tool Schemas: PASS (strict draft-07) | FAIL — <untyped fields>
+On-Device RAM Guard: PASS (>= 6GB check enforced) | N/A | FAIL — <missing guard>
+Eval Metrics: PASS (Faithfulness: <score>, Relevancy: <score>) | FAIL — <below threshold>
+Verified: PASS | FAIL | N/A
+
+## PRD Alignment:
+
+<only when prd brief exists; otherwise "N/A">
+
+Brief: `.ai/context/prds/{TASK_ID}.md`
+User Stories Implemented: <count>/<total>
+Gherkin Acceptance Scenarios: ALL PASS | <failing scenarios>
+Scope Boundary Check: PASS (zero out-of-scope creep) | FAIL — <unauthorized additions>
+Verified: PASS | FAIL | N/A
+
+## Backend Clean Architecture & Migration:
+
+<only when reviewing backend code; otherwise "N/A">
+
+Layering Integrity: PASS (Domain <-> Repo <-> DataSource) | FAIL — <coupling>
+Database Migrations: PASS (versioned, forward-only) | FAIL — <destructive/unversioned>
+SQL Parameterization: PASS (zero raw string queries) | FAIL — <injection risk>
+Idempotency & Auth: PASS | FAIL — <missing headers/auth>
+Verified: PASS | FAIL | N/A
+
+## DevOps & Platform Verification:
+
+<only when devops brief or platform files exist; otherwise "N/A">
+
+Brief: `.ai/context/devops/{TASK_ID}.md` or N/A
+Container Security: PASS (non-root, multi-stage, slim base) | FAIL — <runs as root>
+CI/CD Action SHAs: PASS (pinned commits) | FAIL — <floating tags>
+Secret Redaction: PASS (zero secrets committed) | FAIL — <secret detected>
+Health Check Endpoints: PASS (/healthz, /readyz) | FAIL — <missing probes>
+Verified: PASS | FAIL | N/A
 
 ## Implementation Walkthrough:
 

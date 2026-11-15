@@ -21,6 +21,9 @@ Required markdown headings per brief type. Specialists complete even when sectio
 | compliance | `.ai/context/compliance/{TASK_ID}.md` | Framework map, Gaps, Evidence, Remediation, Not legal advice |
 | design-spec | `.ai/context/design-specs/{TASK_ID}.md` | Node Map, Design Tokens, Layout Spec, Component Reuse Table, Asset Manifest, Screenshot Reference, Open Questions; optional **Verification Contract** slice (required at fidelity gate) |
 | visual-qa | `.ai/context/visual-qa/{TASK_ID}.md` | Viewport & State, Baseline Source, Implementation Capture, Measurement Diff, Screenshot Compare, Open Questions / Accepted Debt |
+| genai-spec | `.ai/context/genai/{TASK_ID}.md` | Model Selection & Routing Strategy, Prompt Architecture, Structured Output & Tool Schemas, RAG & Context Architecture, On-Device SLM Spec, Safety Guardrails & OWASP Defenses, Evaluation & Quality Metrics |
+| prd | `.ai/context/prds/{TASK_ID}.md` | Problem Statement & Value Proposition, Target Personas & User Journeys, Functional Requirements & User Stories, Non-Functional Requirements, Scope & Out-of-Scope Boundaries, Success Metrics & KPIs |
+| devops | `.ai/context/devops/{TASK_ID}.md` | Infrastructure & Deployment Topology, CI/CD Pipeline Spec & Trigger Matrix, Environment Variables & Secrets Contract, Container & Runtime Specifications, Verification Commands & Health Checks |
 
 **Phase A (v1.2.0):** The four P0 types above are advisory-only — specialists never patch code; reviewer remains sole `Approved:` gate. Coordinator routing: [handoff-format.md](handoff-format.md) flags or FILES/SCOPE predicates.
 
@@ -97,12 +100,17 @@ test-run brief (`.ai/context/test-runs/{TASK_ID}.md`) — required when `LOG_CAP
 
 **MAS-09 (v1.7.0):** Device Logs slice parallels MAS-07 **Device** section. Prep FAIL → Device Logs `SKIPPED`; clear/dump not invoked.
 
+**MAS-11 (v1.9.0):** Product engineering brief additions:
+- `genai-spec` — emitted by `mas-genai` (Design Mode); consumed by `mas-test-strategy`, `mas-android-dev`, `mas-backend-dev`, `mas-genai` (Dev Mode), and `mas-reviewer` (step 0l). SOT: [genai-engineering-standards.md](../references/genai-engineering-standards.md).
+- `prd` — emitted by `mas-pm`; consumed by `mas-brainstorm`, `mas-planner`, `mas-architect`, and `mas-reviewer` (step 0m). SOT: [prd-authoring-standards.md](../references/prd-authoring-standards.md).
+- `devops` — emitted by `mas-devops`; consumed by `mas-test-executor`, `mas-security-auditor`, `mas-documenter`, and `mas-reviewer` (step 0o). SOT: [devops-platform-standards.md](../references/devops-platform-standards.md).
+
 ## Validation guidance
 
 | Role | Behavior |
 |------|----------|
-| Brief writers (osint, brainstorm, planner, architect, debate-synthesizer, token-auditor, security-auditor, dependency-risk, api-contract, test-executor, a11y, i18n, compliance, mas-figma, mas-visual-fidelity) | Include required sections when writing briefs; cite this file in skill Startup — do not paste full schema |
-| Reviewer | On review, check briefs in chain against this registry; missing required sections → note in findings; may set `Approved: NO` for schema gaps on deliverable briefs; step **0k** requires `visual-qa` when design-spec exists and P0-6 fired |
+| Brief writers (osint, brainstorm, planner, architect, debate-synthesizer, token-auditor, security-auditor, dependency-risk, api-contract, test-executor, a11y, i18n, compliance, mas-figma, mas-visual-fidelity, mas-pm, mas-genai, mas-devops) | Include required sections when writing briefs; cite this file in skill Startup — do not paste full schema |
+| Reviewer | On review, check briefs in chain against this registry; missing required sections → note in findings; may set `Approved: NO` for schema gaps on deliverable briefs; step **0k** requires `visual-qa` when design-spec exists and P0-6 fired; steps **0l**, **0m**, **0n**, **0o** verify GenAI, PRD, backend, and DevOps deliverables |
 | Coordinator | Does not validate headings inline — forwards `BRIEF_PATH` only |
 
 ## Subscription matrix

@@ -22,14 +22,19 @@ Beyond base context and handoff `BRIEF_PATH` / `SECTIONS:` slice:
 
 | Agent | Reads at startup |
 |-------|------------------|
-| brainstorm | `osint/{TASK_ID}.md`, `specs/{TASK_ID}.md` if exists |
-| planner | osint, brainstorms, specs for `{TASK_ID}` |
-| architect | osint, brainstorms, plans for `{TASK_ID}` |
-| general-dev / android-dev | plans, imaginations, optimizations, ux-reviews, test-strategies for `{TASK_ID}`; **`design-specs/{TASK_ID}.md` when present** including **Verification Contract** slice (conditional — do not call Figma MCP when brief exists) |
+| mas-pm | `osint/{TASK_ID}.md` if exists, `specs/{TASK_ID}.md` if exists, user request |
+| brainstorm | `prds/{TASK_ID}.md` if exists, `osint/{TASK_ID}.md`, `specs/{TASK_ID}.md` if exists |
+| planner | prds, osint, brainstorms, specs for `{TASK_ID}` |
+| architect | prds, osint, brainstorms, plans for `{TASK_ID}` |
+| mas-genai (Design) | architecture, plans, prds for `{TASK_ID}` |
+| mas-genai (Dev) | genai, architecture, plans, test-strategies for `{TASK_ID}`; handoff `FILES` |
+| mas-backend-dev | plans, architecture, genai (if exists), api-contracts (if exists), test-strategies for `{TASK_ID}`; handoff `FILES` |
+| mas-devops | plans, architecture, devops (if exists) for `{TASK_ID}`; changed `FILES` |
+| general-dev / android-dev | plans, imaginations, optimizations, ux-reviews, test-strategies, genai (if exists), prds (if exists) for `{TASK_ID}`; **`design-specs/{TASK_ID}.md` when present** including **Verification Contract** slice (conditional — do not call Figma MCP when brief exists) |
 | mas-figma | osint, architecture, plans for `{TASK_ID}`; handoff `SOURCES_HINT` / `FILES` (Figma URL/node-id) |
 | mas-visual-fidelity | design-specs (all sections + Verification Contract incl. Launch Recipe / Device Target when tier 3), plans for `{TASK_ID}`; dev handoff `FILES`, `LAUNCH:` block, `DEVICE_CAPTURE`, `ADB_SERIAL`; test-strategies visual capture commands slice; [scripts/README.md](../scripts/README.md) when Capture Recipe = `connected-device` |
 | bug-fix | above + `debates/{TASK_ID}.md` when `DEBATE_TRIGGER` or debate brief exists |
-| reviewer | all `{TASK_ID}` briefs in context dirs + handoff `FILES`; **`visual-qa/{TASK_ID}.md` at step 0k** (after 0j design-spec) when design-spec exists |
+| reviewer | all `{TASK_ID}` briefs in context dirs (including `genai/`, `prds/`, `devops/`) + handoff `FILES`; **`visual-qa/{TASK_ID}.md` at step 0k**; `genai-spec` at step 0l; `prd` at step 0m; backend at step 0n; `devops` at step 0o |
 | debate-synthesizer | reviewer output, prior `debates/{TASK_ID}.md`, handoff `FILES` |
 | token-auditor | `workflow-sessions/{TASK_ID}.json` only |
 | security-auditor | osint, architecture, plans for `{TASK_ID}`; changed FILES from handoff |
@@ -74,3 +79,9 @@ Brainstorm briefs (from Brainstorm): `.ai/context/brainstorms/{TASK_ID}.md`
 Debate briefs (from Debate Synthesizer): `.ai/context/debates/{TASK_ID}.md`
 
 Audit briefs (from Token Auditor): `.ai/context/audits/{TASK_ID}.md`
+
+PRD briefs (from Product Manager): `.ai/context/prds/{TASK_ID}.md`
+
+GenAI spec briefs (from GenAI Specialist): `.ai/context/genai/{TASK_ID}.md`
+
+DevOps briefs (from DevOps Specialist): `.ai/context/devops/{TASK_ID}.md`

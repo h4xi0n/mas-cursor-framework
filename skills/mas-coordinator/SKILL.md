@@ -1,6 +1,6 @@
 ---
 name: mas-coordinator
-description: Coordinator agent for multi-agent workflows. Routes to Spec Reader, Brainstorm, Planner, Architect, Test Strategy, Dev, UX Intelligence, OSINT, Imaginer, Perf Optimizer, Release Readiness, Bug Fix, Documenter, Reviewer, or Commit. Use only when /mas or /mas-lite is active. Never implements code.
+description: Coordinator agent for multi-agent workflows. Routes to PM, Spec Reader, Brainstorm, Planner, Architect, GenAI, Figma, Visual Fidelity, Test Strategy, Backend Dev, Android Dev, General Dev, DevOps, UX Intelligence, OSINT, Imaginer, Perf Optimizer, Release Readiness, Bug Fix, Documenter, Reviewer, or Commit. Use only when /mas or /mas-lite is active. Never implements code.
 disable-model-invocation: true
 ---
 
@@ -59,6 +59,16 @@ When user message starts with `/mas-lite` or handoff has `MODE: LITE`:
    Full `/mas` handoffs: set `MODE: FULL` and `TIER: none` on every handoff for consistency.
 
 ## Routing Rules
+
+Route to **Product Manager (mas-pm)** when (P0-PM):
+
+- User request is a greenfield feature or new product scope with high ambiguity
+- Handoff sets `PRD_AUTH: yes`
+- No existing PRD, spec brief, or formal requirements attached
+- **Default Tier 1 entry step** before Brainstorm or Planner to frame problem, personas, customer journeys, Gherkin user stories, and MVP boundaries
+- Emits `.ai/context/prds/{TASK_ID}.md` (`prd` brief)
+
+Skip Product Manager when: existing PRD or spec document is attached (→ Spec Reader), bug fixes, performance tuning, or scope is already fully decided in handoff.
 
 Route to **Spec Reader** when:
 
@@ -133,6 +143,21 @@ Route to **Architect** when:
 - New module design
 - Refactor planning
 
+## MAS-11 — P0-GENAI mas-genai (Design Mode)
+
+Zero-token routing — evaluate **after architect**, **before test-strategy**. **First match wins**; max **one `mas-genai` Design spawn per `TASK_ID`**.
+
+| Priority | Predicate (any true) | Specialist | Default chain position |
+|----------|----------------------|------------|------------------------|
+| P0-GENAI (Design) | `GENAI_SPEC: yes` OR `SCOPE: genai` OR AI keywords in `SCOPE`/`GOAL` (`llm`, `rag`, `gemma`, `mediapipe`, `prompt`, `embedding`, `langchain`, `langgraph`, `openai`, `vertexai`) | mas-genai (Design Mode) | After architect; **before** test-strategy |
+
+- Model class: `thinking` (`claude-opus-4-7-thinking-high`)
+- Emits: `.ai/context/genai/{TASK_ID}.md` (`genai-spec` brief)
+- Prohibited from writing production code or tests
+- Protected-when-triggered in full `/mas` (cannot be silently dropped)
+
+**Suppression rule:** Skip when `GENAI_SPEC: no` or logic-only changes without AI components.
+
 ## MAS-05 — P0-5 mas-figma (design-spec feeder)
 
 Zero-token routing — evaluate **before the dev slot** (after architect/planner). **First match wins**; max **one `mas-figma` spawn per `TASK_ID`** unless handoff `RE_EXTRACT: yes`. Track in session JSON `specialists_spawned: []`.
@@ -202,6 +227,28 @@ Route to **Android Dev** when:
 Route to **General Dev** when:
 
 - Implementation required AND project is non-Android (React, Next, Node, Python, etc.)
+
+Route to **Backend Dev (mas-backend-dev)** when (P-BACKEND):
+
+- `BACKEND: yes` OR `FILES` touch server-side code (Node, Python, Go, Spring, Ktor, SQL, Prisma, DB migrations) OR `SCOPE: backend|api|database`
+- Tier 3 dev slot (alongside or preceding client dev)
+- Standards: `backend-engineering-standards.md`
+- Protected-when-triggered in full `/mas`
+
+Route to **GenAI Specialist (Dev Mode)** when (P0-GENAI Dev):
+
+- `TARGET_AGENT: mas-genai` on dev handoff OR AI engine implementation tasks
+- Tier 3 dev slot
+- Standards: `genai-engineering-standards.md`
+- Protected-when-triggered in full `/mas`
+
+Route to **DevOps Specialist (mas-devops)** when (P-DEVOPS):
+
+- `DEVOPS: yes` OR `FILES` touch `.github/workflows/`, `Dockerfile`, `docker-compose.yml`, `*.tf`, k8s manifests OR `SCOPE: devops|ci-cd|infra`
+- Tier 4 platform slot (post-dev, pre-audits)
+- Emits `.ai/context/devops/{TASK_ID}.md` (`devops` brief) + platform code passing dry-run
+- Standards: `devops-platform-standards.md`
+- Protected-when-triggered in full `/mas`
 
 Route to **Imaginer** when:
 

@@ -42,6 +42,10 @@ Record resolved `model_class` via `record-workflow-step.ps1 -ModelClass`.
 | compliance | `thinking` | `claude-opus-4-7-thinking-high` or latest thinking-high family |
 | mas-figma | `normal` | default / `composer-2.5` |
 | mas-visual-fidelity | `normal` | default / `composer-2.5` |
+| mas-genai | `thinking` (Design) / `normal` (Dev) | `claude-opus-4-7-thinking-high` (Design) / default (Dev) |
+| mas-pm | `normal` | default / `composer-2.5` |
+| mas-backend-dev | `normal` | default / `composer-2.5` |
+| mas-devops | `normal` | default / `composer-2.5` |
 
 Lite Reviewer with `REVIEWER_MODE: lite` may use `fast` when Coordinator sets `MC: fast` on handoff.
 
@@ -52,6 +56,12 @@ Lite Reviewer with `REVIEWER_MODE: lite` may use `fast` when Coordinator sets `M
 **MAS-05 (v1.3.0):** `mas-figma` → `normal` (default). Escalate to `thinking` when handoff `FIGMA_COMPLEXITY: high` or Coordinator sets `MODEL_CLASS: thinking` explicitly (node count > 40, variant depth ≥ 3, or unbound values > 30% — see [figma-extraction-standards.md](../references/figma-extraction-standards.md)).
 
 **MAS-06 (v1.4.0):** `mas-visual-fidelity` → `normal` (default). Escalate to `thinking` when handoff `FIGMA_COMPLEXITY: high` or design-spec has **> 3** screen states (sectioned visual-qa brief). Lite: `VFID:y` explicit only — see [handoff-format-lite.md](handoff-format-lite.md).
+
+**MAS-11 (v1.9.0):** Product engineering specialists:
+- `mas-genai` → dual-mode: `thinking` (`claude-opus-4-7-thinking-high`) in Design Mode when authoring `genai-spec` (prompt hierarchy, strict JSON schemas, RAG contracts, on-device SLM RAM guards); `normal` in Dev Mode when implementing SDK wrappers, gateways, and eval harnesses.
+- `mas-pm` → `normal` (default); escalate to `thinking` when decomposing multi-system enterprise platforms or complex user journey matrices.
+- `mas-backend-dev` → `normal` (default) for domain models, DB migrations, API controllers, and integration tests.
+- `mas-devops` → `normal` (default) for multi-stage Dockerfiles, GitHub Actions CI/CD workflows, and Terraform IaC.
 
 ## Override rules
 

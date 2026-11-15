@@ -6,7 +6,7 @@ Max **12 lines**. Write to `.ai/handoffs/{TASK_ID}.md` only — never paste in c
 TASK_ID: <id>
 MODE: LITE
 TIER: S|M|L|L+
-TARGET_AGENT: <osint|imaginer|perf-optimizer|release-readiness|test-strategy|security-auditor|dependency-risk|api-contract|test-executor|mas-figma|bug-fix|android-dev|general-dev|ux-intelligence|brainstorm|planner|reviewer|debate-synthesizer|token-auditor>
+TARGET_AGENT: <osint|imaginer|perf-optimizer|release-readiness|test-strategy|security-auditor|dependency-risk|api-contract|test-executor|mas-figma|bug-fix|android-dev|general-dev|ux-intelligence|brainstorm|planner|reviewer|debate-synthesizer|token-auditor|mas-pm|mas-genai|mas-backend-dev|mas-devops>
 SPAWN_STATUS: spawned
 MC: fast|normal|thinking          # optional; lite MODEL_CLASS — see spawn-model-policy.md
 BP: .ai/context/osint/{TASK_ID}.md # optional BRIEF_PATH
@@ -44,12 +44,23 @@ DONE
 | `DEVICE_POLICY:` | `DEV_POL:` | `DEV_POL:physical` |
 | `LOG_CAPTURE:` | `LOG:` | `LOG:y` |
 | `LIST_SURFACE:` | `LIST:` | `LIST:y` |
+| `PRD_AUTH:` | `PM:` | `PM:y` |
+| `GENAI_SPEC:` | `GEN:` | `GEN:y` |
+| `BACKEND:` | `BE:` | `BE:y` |
+| `DEVOPS:` | `OPS:` | `OPS:y` |
 
 **`SEC:` disambiguation (12-line cap):** `SEC:y` or `SEC:n` → `SECURITY_AUDIT` routing flag. `SEC: Heading1, Heading2` (comma-separated headings) → `SECTIONS:` slice per [brief-schemas.md](brief-schemas.md). Do not combine both on one line.
 
 **Compliance:** `COMPLIANCE_FRAMEWORK` — **full `/mas` only** (no lite abbreviation). Enterprise opt-in; never spawn in lite.
 
 **MAS-06 (v1.4.0):** `VFID:y` — explicit mas-visual-fidelity trigger only (no auto predicate in lite). When design-spec exists without `VFID:y`, skip spawn + warn "Figma fidelity unverified". L/L+ within tier cap only.
+
+**MAS-11 (v1.9.0):** Lite mode supports single-discipline focus flags (`PM:y`, `GEN:y`, `BE:y`, `OPS:y`) within tier caps:
+- S-Tier (cap 2): `OPS:y` for platform/infra tweaks (`mas-devops` → `none` or `reviewer-lite`) or `PM:y` (scoping only).
+- M-Tier (cap 2): `BE:y` for backend service/migration work (`mas-backend-dev` → `reviewer-lite`).
+- L-Tier (cap 3): `GEN:y` for GenAI dev (`planner` → `mas-genai` (Dev) → `reviewer-lite`) or `OPS:y`.
+- L+-Tier (cap 4): `PM:y` for greenfield scoping (`mas-pm` → `planner` → `dev` → `reviewer-lite`).
+If a request requires multiple new specialist disciplines simultaneously, Coordinator advises upgrading to full `/mas`.
 
 Drop `CONTEXT` bullets in favor of `BP:` when brief exists. Max **12 lines** total.
 

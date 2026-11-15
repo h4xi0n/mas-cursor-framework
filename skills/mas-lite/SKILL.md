@@ -50,6 +50,13 @@ Low-token alternative to full `/mas`. Load [mas-coordinator](../mas-coordinator/
 
 **MAS-06 (L/L+ only):** `VFID:y` triggers mas-visual-fidelity explicitly — **no auto predicate** in lite. S/M tiers: no mas-visual-fidelity spawn unless user upgrades to full `/mas`. When design-spec exists without `VFID:y`, skip spawn + warn **"Figma fidelity unverified"**. If `VFID:y` would breach tier cap, document skip and recommend full `/mas`.
 
+**MAS-11 (v1.9.0):** Lite single-discipline focus flags (`PM:y`, `GEN:y`, `BE:y`, `OPS:y`):
+- **`PM:y` (L+/S):** `mas-pm` scoping pass in L+ tier (`mas-pm → planner → dev → reviewer-lite`) or S tier (`mas-pm` scoping only, cap 1).
+- **`GEN:y` (L):** `mas-genai` Dev pass (`planner → mas-genai (Dev) → reviewer-lite`, cap 3).
+- **`BE:y` (M):** `mas-backend-dev` pass (`mas-backend-dev → reviewer-lite`, cap 2).
+- **`OPS:y` (S/M):** `mas-devops` platform pass (`mas-devops → reviewer-lite` or `none`, cap 1–2).
+- **Escalation rule:** If user request requires multiple new specialists simultaneously, Coordinator recommends upgrading to full `/mas`.
+
 Use **L+** when user says brainstorm, options, tradeoffs, or scope is ambiguous on logic/API/state.
 
 **Brainstorm in Lite:** `UI_SCOPE: logic-only` unless user explicitly asks for UI.
@@ -62,7 +69,7 @@ Upgrade to full `/mas` when: PRD/API docs attached, new module, user says "full 
 TASK_ID: <id>
 MODE: LITE
 TIER: S|M|L|L+
-TARGET_AGENT: <osint|imaginer|perf-optimizer|release-readiness|test-strategy|bug-fix|android-dev|general-dev|ux-intelligence|brainstorm|planner|reviewer>
+TARGET_AGENT: <osint|imaginer|perf-optimizer|release-readiness|test-strategy|bug-fix|android-dev|general-dev|ux-intelligence|brainstorm|planner|reviewer|mas-pm|mas-genai|mas-backend-dev|mas-devops>
 GOAL: <one sentence>
 CONTEXT:
 * See memory.md — <section>

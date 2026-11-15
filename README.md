@@ -1,6 +1,6 @@
 # MAS Cursor Framework
 
-**Version:** 1.7.0 (MAS-09 log capture + MAS-07 device prep gate)
+**Version:** 1.9.0 (MAS-11 Full Product Engineering Team & GenAI Expansion)
 
 Portable distribution of the **Multi-Agent System (MAS)** for [Cursor](https://cursor.com). MAS orchestrates specialized AI agents through slash commands — `/mas` for the full pipeline and `/mas-lite` for token-efficient workflows.
 
@@ -10,7 +10,7 @@ This repo contains everything needed to install MAS on another machine: skills, 
 
 | Path | Contents |
 |------|----------|
-| `skills/` | MAS skill trees (`multi-agent-system`, coordinator, specialists, P0 audit quartet, P1 depth trio, `mas-debate`, `mas-token-auditor`, `mas-lite`) |
+| `skills/` | MAS skill trees (`multi-agent-system`, coordinator, product engineering team [`mas-pm`, `mas-genai`, `mas-backend-dev`, `mas-devops`], specialists, P0 audit quartet, P1 depth trio, `mas-debate`, `mas-token-auditor`, `mas-lite`) |
 | `commands/` | `mas.md`, `mas-lite.md` slash command definitions |
 | `rules/` | `multi-agent-hybrid.mdc` workspace rule |
 | `hooks/` | Session context hooks (`mas-session-context.ps1`, `.sh`) |
@@ -89,6 +89,61 @@ dev → [ux-intelligence?] → [a11y?] → [i18n?] → [compliance?] → [test-e
 4. `compliance` never spawns without `COMPLIANCE_FRAMEWORK` set.
 
 **Mutual exclusion:** a11y owns WCAG depth (ux-intelligence owns behavioral friction); i18n owns locale/string architecture (not translation vendor workflow); compliance owns regulatory evidence (security-auditor owns exploitability). Overflow skip order: a11y → i18n → compliance. See [mas-coordinator/SKILL.md](skills/mas-coordinator/SKILL.md) and [handoff-format.md](skills/multi-agent-system/protocol/handoff-format.md).
+
+## MAS-11 — Full Product Engineering Team & GenAI Expansion (v1.9.0)
+
+Upgrades MAS into a complete, autonomous **Full Product Engineering Organization** spanning product discovery, system architecture, generative AI engineering, full-stack implementation, platform DevOps, and centralized quality governance.
+
+### Product Engineering Team Roster
+
+| Specialist | Skill | Focus Area | Brief Artifact |
+|------------|-------|------------|----------------|
+| **Product Manager** | `mas-pm` | Problem discovery, customer journey maps, Gherkin user stories, NFR budgets, MVP vs deferred scope | `.ai/context/prds/{TASK_ID}.md` |
+| **GenAI Specialist** | `mas-genai` | Dual-mode: AI architecture/prompt design (Design) & model pipelines/evals (Dev) | `.ai/context/genai/{TASK_ID}.md` |
+| **Backend Dev** | `mas-backend-dev` | Clean architecture, forward-only DB migrations, parameterized queries, idempotency, auth | Application code & migrations |
+| **DevOps / Platform** | `mas-devops` | Multi-stage Docker, GitHub Actions (pinned SHAs), Terraform IaC, `.env.example`, health probes | `.ai/context/devops/{TASK_ID}.md` |
+
+### GenAI Specialist Capabilities
+
+`mas-genai` introduces enterprise-grade generative AI engineering across client edge and cloud infrastructure:
+
+- **Dual-Tier Model Routing**:
+  - **Tier 1 (On-Device SLM)**: Google MediaPipe Tasks GenAI (`tasks-genai:0.10.20+`) executing quantized models (Gemma 2B / 3B INT4). Enforces pre-flight RAM guard (`ActivityManager.MemoryInfo.totalMem >= 6GB`), background `Dispatchers.IO` execution, and non-blocking `Flow<String>` token streaming.
+  - **Tier 2 (Cloud Gateway)**: LiteLLM proxy with automated fallback cascades (primary $\rightarrow$ secondary provider), exponential backoff, and Langfuse/OTLP observability for token spend and latency tracing.
+- **Prompt Architecture & Engineering**:
+  - Strict XML tag hierarchy (`<context>`, `<system_instructions>`, `<constraints>`, `<tools>`, `<output_schema>`) preventing delimiter collisions.
+  - High-leverage few-shot exemplars covering edge cases and counter-examples.
+  - Static prompt prefix caching optimization ($\ge 1024$ tokens for Anthropic KV-cache, $\ge 32\text{k}$ for Gemini context caching).
+- **Structured Output & Tool Calling**:
+  - Strict JSON Schema draft-07 definitions with `additionalProperties: false` and required attribute arrays for zero hallucination during function calling.
+- **Hybrid RAG & Retrieval**:
+  - Semantic chunking with overlap boundaries, hybrid retrieval combining dense vector search with sparse BM25 keyword matching, cross-encoder reranking, and metadata filtering.
+- **Safety Guardrails & OWASP Defenses**:
+  - Dual runtime guardrails: input XML escaping and prompt injection classifiers; output JSON validation and PII redaction.
+  - Mitigations for OWASP Top 10 for LLMs (prompt injection, insecure output handling, training data poisoning, model denial of service).
+- **Automated Evaluation Harnesses**:
+  - DeepEval RAG Triad test suites: Faithfulness $\ge 0.85$, Answer Relevancy $\ge 0.85$, Context Recall $\ge 0.80$, Hallucination Score $\le 0.10$.
+  - `promptfoo` red-teaming matrix and deterministic schema validation assertions.
+
+### 6-Tier Product Engineering SDLC Assembly Line
+
+The multi-agent workflow operates across six deterministic tiers:
+1. **Tier 1: Requirements & Discovery** — `mas-pm` (PRD authoring), `mas-spec-reader` (external doc ingestion), `mas-osint` (prior art research).
+2. **Tier 2: Planning & Architecture** — `mas-brainstorm` (technical tradeoffs), `mas-planner` (task breakdown), `mas-architect` (system topology), `mas-genai` (Design Mode: AI specification), `mas-figma` (design spec extraction).
+3. **Tier 3: Test Strategy & Implementation** — `mas-test-strategy` (test matrix planning), `mas-backend-dev` (APIs/DB), `mas-genai` (Dev Mode: client/gateway/evals), `mas-android-dev` (Compose/mobile), `mas-general-dev` (web/scripts).
+4. **Tier 4: Platform & DevOps** — `mas-devops` (containerization, CI/CD, IaC, health probes).
+5. **Tier 5: Quality & Audits** — `mas-visual-fidelity` (post-dev UI parity), P0 audit quartet (`mas-security-auditor`, `mas-dependency-risk`, `mas-api-contract`, `mas-test-executor`), P1 depth trio (`mas-a11y`, `mas-i18n`, `mas-compliance`).
+6. **Tier 6: Governance & Delivery** — `mas-documenter` (codebase docs & changelog), `mas-reviewer` (centralized merge gate with steps 0–0o), `mas-commit` (structured git commit).
+
+### Coordinator Routing Flags & Lite Abbreviations
+
+| Full `/mas` Flag | Lite Flag (`/mas-lite`) | Target Specialist | Trigger Conditions |
+|------------------|-------------------------|-------------------|-------------------|
+| `PRD_AUTH: yes` | `PM:y` | `mas-pm` | Ambiguous greenfield concept or explicit flag |
+| `GENAI_SPEC: yes` | `GEN:y` | `mas-genai` (Design) | `GENAI_SPEC: yes`, `SCOPE: genai`, or AI keywords |
+| `TARGET_AGENT: mas-genai` | `GEN:y` | `mas-genai` (Dev) | Dev handoff for AI engine/eval implementation |
+| `BACKEND: yes` | `BE:y` | `mas-backend-dev` | `BACKEND: yes`, server files touched, or backend scope |
+| `DEVOPS: yes` | `OPS:y` | `mas-devops` | `DEVOPS: yes`, infra files touched, or devops scope |
 
 ## Quick install
 

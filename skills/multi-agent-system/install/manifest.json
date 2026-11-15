@@ -1,6 +1,6 @@
 {
   "name": "mas-cursor-framework",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "description": "Multi-Agent System for Cursor — skills, commands, rules, hooks",
   "skills": [
     "multi-agent-system",
@@ -33,7 +33,11 @@
     "mas-i18n",
     "mas-compliance",
     "mas-figma",
-    "mas-visual-fidelity"
+    "mas-visual-fidelity",
+    "mas-genai",
+    "mas-pm",
+    "mas-backend-dev",
+    "mas-devops"
   ],
   "commands": ["mas.md", "mas-lite.md"],
   "rules": ["multi-agent-hybrid.mdc"],

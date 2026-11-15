@@ -53,6 +53,10 @@ Coordinator **must** delegate every specialist step to Cursor's **Task** tool. N
 | compliance | `~/.cursor/skills/mas-compliance/SKILL.md` |
 | mas-figma | `~/.cursor/skills/mas-figma/SKILL.md` |
 | mas-visual-fidelity | `~/.cursor/skills/mas-visual-fidelity/SKILL.md` |
+| mas-genai | `~/.cursor/skills/mas-genai/SKILL.md` |
+| mas-pm | `~/.cursor/skills/mas-pm/SKILL.md` |
+| mas-backend-dev | `~/.cursor/skills/mas-backend-dev/SKILL.md` |
+| mas-devops | `~/.cursor/skills/mas-devops/SKILL.md` |
 
 ## Coordinator spawn sequence
 

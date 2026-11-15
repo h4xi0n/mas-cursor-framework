@@ -1,6 +1,6 @@
 ---
 name: multi-agent-system
-description: Full multi-agent orchestration (internal entry). Users should invoke /mas slash command or mas skill — not /multi-agent-system. Spec Reader, Brainstorm, Planner, Architect, Dev, UX Intelligence, OSINT, Imaginer, Perf Optimizer, Release Readiness, Test Strategy, Phase A P0 audit quartet (security-auditor, dependency-risk, api-contract, test-executor), Phase B P1 depth trio (a11y, i18n, compliance), Documenter, Bug Fix, Reviewer, Commit. Low token: /mas-lite.
+description: Full multi-agent orchestration (internal entry). Users should invoke /mas slash command or mas skill — not /multi-agent-system. Product Manager, Spec Reader, Brainstorm, Planner, Architect, GenAI, Figma, Test Strategy, Backend Dev, Android Dev, General Dev, DevOps, UX Intelligence, OSINT, Imaginer, Perf Optimizer, Release Readiness, P0 audit quartet (security-auditor, dependency-risk, api-contract, test-executor), P1 depth trio (a11y, i18n, compliance), Visual Fidelity, Documenter, Bug Fix, Reviewer, Commit. Low token: /mas-lite.
 ---
 
 # Multi-Agent System
@@ -129,18 +129,23 @@ cd skills\multi-agent-system\install
 | Full `/mas` | mas (alias) → multi-agent-system |
 | MAS Lite | mas-lite |
 | Coordinator | mas-coordinator |
+| Product Manager | mas-pm |
 | Spec Reader | mas-spec-reader |
 | Brainstorm | mas-brainstorm |
 | Planner | mas-planner |
 | Architect | mas-architect |
+| GenAI Specialist | mas-genai |
+| Figma Extraction | mas-figma |
+| Test Strategy | mas-test-strategy |
+| Backend Dev | mas-backend-dev |
 | Android Dev | mas-android-dev |
 | General Dev | mas-general-dev |
+| DevOps & Platform | mas-devops |
 | OSINT | mas-osint |
 | Imaginer | mas-imaginer |
 | UX Intelligence | mas-ux-intelligence |
 | Perf Optimizer | mas-perf-optimizer |
 | Release Readiness | mas-release-readiness |
-| Test Strategy | mas-test-strategy |
 | Security Auditor | mas-security-auditor |
 | Dependency Risk | mas-dependency-risk |
 | API Contract | mas-api-contract |
@@ -148,7 +153,6 @@ cd skills\multi-agent-system\install
 | A11y | mas-a11y |
 | I18n | mas-i18n |
 | Compliance | mas-compliance |
-| Figma Extraction | mas-figma |
 | Visual Fidelity | mas-visual-fidelity |
 | Bug Fix | mas-bug-fix |
 | Documenter | mas-documenter |
@@ -281,6 +285,119 @@ Read-only post-dev design fidelity specialist. Consumes design-spec + **Verifica
 
 Standards: [visual-fidelity-standards.md](references/visual-fidelity-standards.md)
 
+## MAS-11 — Full Product Engineering Team Expansion (v1.9.0)
+
+Adds four specialized engineering disciplines to transform MAS from a dev-centric framework into a full product engineering organization:
+
+| Specialist | Skill | Brief path | `MODEL_CLASS` | Chain position |
+|------------|-------|------------|---------------|----------------|
+| Product Manager | [mas-pm](../mas-pm/SKILL.md) | `.ai/context/prds/{TASK_ID}.md` | normal (thinking for complex platforms) | Tier 1 (Entry) — before brainstorm/planner |
+| GenAI Specialist | [mas-genai](../mas-genai/SKILL.md) | `.ai/context/genai/{TASK_ID}.md` | thinking (Design) / normal (Dev) | Post-architect (Design); Tier 3 dev slot (Dev) |
+| Backend Dev | [mas-backend-dev](../mas-backend-dev/SKILL.md) | N/A (workspace code + tests) | normal | Tier 3 dev slot — alongside/preceding client dev |
+| DevOps / Platform | [mas-devops](../mas-devops/SKILL.md) | `.ai/context/devops/{TASK_ID}.md` | normal | Tier 4 platform slot — post-dev, pre-audits |
+
+### 6-Tier Product Engineering SDLC Assembly Line
+
+The multi-agent lifecycle is structured into six deterministic, sequential tiers:
+
+```mermaid
+flowchart TD
+    User["User Request (/mas or /mas-lite)"] --> Coord["Coordinator (mas-coordinator)"]
+    
+    %% Tier 1: Requirements & Discovery
+    subgraph Tier1 ["Tier 1: Requirements & Discovery"]
+        Coord -->|"P0-PM: PRD_AUTH: yes / ambiguous request"| PM["Product Manager (mas-pm)\n[prd brief]"]
+        Coord -->|"External docs / specs attached"| SpecReader["Spec Reader (mas-spec-reader)\n[spec brief]"]
+        Coord -->|"Prior art / research requested"| OSINT["OSINT (mas-osint)\n[osint brief]"]
+        PM -->|"prd brief (.ai/context/prds/)"| Brainstorm["Brainstorm (mas-brainstorm)"]
+        SpecReader -->|"spec brief (.ai/context/specs/)"| Brainstorm
+        OSINT -->|"osint brief (.ai/context/osint/)"| Brainstorm
+    end
+    
+    %% Tier 2: Planning & Architecture
+    subgraph Tier2 ["Tier 2: Planning & Architecture"]
+        Brainstorm -->|"brainstorm brief"| Planner["Planner (mas-planner)\n[plan brief]"]
+        Planner -->|"plan brief"| Architect["Architect (mas-architect)\n[architecture brief]"]
+        Architect -->|"P0-GENAI (Design): GENAI_SPEC: yes"| GenAIDesign["GenAI Specialist — Design Mode (mas-genai)\n[genai-spec brief]"]
+        Architect -->|"P0-5: FIGMA_SPEC: yes"| Figma["Figma Extraction (mas-figma)\n[design-spec brief]"]
+    end
+    
+    %% Tier 3: Test Strategy & Multi-Discipline Engineering
+    subgraph Tier3 ["Tier 3: Test Strategy & Implementation"]
+        GenAIDesign -->|"genai-spec brief"| TestStrat["Test Strategy (mas-test-strategy)\n[test-strategy brief]"]
+        Figma -->|"design-spec brief"| TestStrat
+        Architect -->|"architecture brief"| TestStrat
+        
+        TestStrat -->|"P-BACKEND: backend code / DB"| BackendDev["Backend Dev (mas-backend-dev)\n[API / Migrations / Services]"]
+        TestStrat -->|"P0-GENAI (Dev): AI client / evals"| GenAIDev["GenAI Specialist — Dev Mode (mas-genai)\n[Gateway / MediaPipe / Evals]"]
+        TestStrat -->|"Android App / Compose UI"| AndroidDev["Android Dev (mas-android-dev)\n[Compose / ViewModel / Repos]"]
+        TestStrat -->|"General / Web / Scripts"| GeneralDev["General Dev (mas-general-dev)\n[Full-stack / Scripts]"]
+    end
+    
+    %% Tier 4: Platform & DevOps
+    subgraph Tier4 ["Tier 4: Platform & DevOps"]
+        BackendDev -->|"P-DEVOPS: DEVOPS: yes / infra files"| DevOps["DevOps / Platform Engineer (mas-devops)\n[devops brief + CI/CD + Docker + IaC]"]
+        AndroidDev -->|"P-DEVOPS: DEVOPS: yes / infra files"| DevOps
+        GenAIDev -->|"P-DEVOPS: DEVOPS: yes / infra files"| DevOps
+        GeneralDev -->|"P-DEVOPS: DEVOPS: yes / infra files"| DevOps
+    end
+    
+    %% Tier 5: Audits & Quality Suite
+    subgraph Tier5 ["Tier 5: Quality & Audits"]
+        DevOps --> Audits["Post-Dev Audits:"]
+        AndroidDev --> Audits
+        BackendDev --> Audits
+        GenAIDev --> Audits
+        GeneralDev --> Audits
+        
+        Audits --> P0Quartet["P0 Audit Quartet:\nmas-security-auditor\nmas-supply-chain\nmas-api-contract\nmas-test-executor"]
+        Audits --> P1Trio["P1 Audit Trio:\nmas-a11y\nmas-i18n\nmas-compliance"]
+        Audits --> VisualQA["Post-Dev Fidelity:\nmas-visual-fidelity (P0-6)"]
+    end
+    
+    %% Tier 6: Governance & Delivery
+    subgraph Tier6 ["Tier 6: Governance & Delivery"]
+        P0Quartet --> Doc["Documenter (mas-documenter)"]
+        P1Trio --> Doc
+        VisualQA --> Doc
+        Doc --> Rev["Reviewer (mas-reviewer) — Sole Gate\n[Steps 0–0o Audit Checks]"]
+        Rev -->|"Approved: YES + User Confirms"| Commit["Commit (mas-commit)"]
+        Rev -->|"Approved: NO"| BugFix["Bug Fix (mas-bug-fix) / Dev Loop"]
+    end
+```
+
+| Tier | Primary Objective | Member Agents | Input Contracts | Output Artifacts |
+|------|-------------------|---------------|-----------------|------------------|
+| **Tier 1: Requirements & Discovery** | Frame problem, capture requirements, define personas, establish MVP boundaries, explore prior art. | `mas-pm`, `mas-spec-reader`, `mas-osint` | User request, raw requirements, external docs, repo state | `.ai/context/prds/{TASK_ID}.md`<br>`.ai/context/specs/{TASK_ID}.md`<br>`.ai/context/osint/{TASK_ID}.md` |
+| **Tier 2: Planning & Architecture** | Brainstorm technical options, decompose tasks, design system architecture, specify AI prompts/RAG, extract design specs. | `mas-brainstorm`, `mas-planner`, `mas-architect`, `mas-genai` (Design), `mas-figma` | Tier 1 briefs, existing codebase, project memory | `.ai/context/brainstorms/{TASK_ID}.md`<br>`.ai/context/plans/{TASK_ID}.md`<br>`.ai/context/architecture/{TASK_ID}.md`<br>`.ai/context/genai/{TASK_ID}.md`<br>`.ai/context/design-specs/{TASK_ID}.md` |
+| **Tier 3: Test Strategy & Implementation** | Define test matrices, author tests, implement business logic, database migrations, AI pipelines, mobile UI. | `mas-test-strategy`, `mas-backend-dev`, `mas-genai` (Dev), `mas-android-dev`, `mas-general-dev` | Tier 2 briefs, API contracts, design specs | `.ai/context/test-strategies/{TASK_ID}.md`<br>Application source code<br>Database migration scripts<br>Unit & integration tests |
+| **Tier 4: Platform & DevOps** | Containerization, CI/CD pipeline automation, Infrastructure as Code, environment configuration, runtime health checks. | `mas-devops` | Tier 3 code changes, deployment requirements | `.ai/context/devops/{TASK_ID}.md`<br>`.github/workflows/*.yml`<br>`Dockerfile`, `docker-compose.yml`<br>`terraform/*.tf` |
+| **Tier 5: Quality & Audits** | Automated test execution, security scans, dependency audits, contract drift validation, visual fidelity, accessibility, internationalization. | `mas-visual-fidelity`, `mas-security-auditor`, `mas-dependency-risk`, `mas-api-contract`, `mas-test-executor`, `mas-a11y`, `mas-i18n`, `mas-compliance` | Code changes, running tests, design specs, security rules | `.ai/context/visual-qa/{TASK_ID}.md`<br>`.ai/context/security-audits/{TASK_ID}.md`<br>`.ai/context/api-contracts/{TASK_ID}.md`<br>`.ai/context/supply-chain/{TASK_ID}.md`<br>`.ai/context/test-runs/{TASK_ID}.md` |
+| **Tier 6: Governance & Delivery** | Daily changelogs, codebase documentation, comprehensive multi-step audit verification, git commits. | `mas-documenter`, `mas-reviewer`, `mas-commit` | All generated briefs, full git diff, test run logs | Code documentation<br>Daily changelog entry<br>`Approved: YES \| NO`<br>Git commit |
+
+### Routing Flags & Predicates
+
+| Full `/mas` Flag | Lite Flag (`/mas-lite`) | Target Specialist | Trigger Conditions | Chain Slot |
+|------------------|-------------------------|-------------------|-------------------|------------|
+| `PRD_AUTH: yes` | `PM:y` | `mas-pm` | Greenfield feature with high ambiguity, or explicit `PRD_AUTH: yes` | Tier 1 (Entry) |
+| `GENAI_SPEC: yes` | `GEN:y` | `mas-genai` (Design) | `GENAI_SPEC: yes`, `SCOPE: genai`, or AI keywords (`llm`, `rag`, `gemma`, `mediapipe`, `prompt`, `embedding`, `langchain`, `langgraph`, `openai`, `vertexai`) | Tier 2 (Post-Architect) |
+| `TARGET_AGENT: mas-genai` | `GEN:y` | `mas-genai` (Dev) | Dev handoff targeting GenAI implementation or eval harness wiring | Tier 3 (Dev Slot) |
+| `BACKEND: yes` | `BE:y` | `mas-backend-dev` | `BACKEND: yes`, server-side code in `FILES` (Node, Python, Go, Spring, Ktor, SQL, Prisma), or `SCOPE: backend\|api\|database` | Tier 3 (Dev Slot) |
+| `DEVOPS: yes` | `OPS:y` | `mas-devops` | `DEVOPS: yes`, infra files in `FILES` (`.github/workflows/`, `Dockerfile`, `docker-compose.yml`, `*.tf`), or `SCOPE: devops\|ci-cd\|infra` | Tier 4 (Platform Slot) |
+
+### Dual-Mode `mas-genai` Lifecycle
+
+- **Design Mode** (`MODEL_CLASS: thinking`): Emits `.ai/context/genai/{TASK_ID}.md` (`genai-spec` brief). Defines system prompts with XML tag hierarchy, strict JSON tool schemas (`additionalProperties: false`), RAG chunking and caching, on-device SLM RAM guard requirements, safety guardrails (OWASP LLM Top 10), and evaluation metrics (`DeepEval` RAG triad, `promptfoo` assertions). Never writes code.
+- **Dev Mode** (`MODEL_CLASS: normal`): Implements client/gateway code (MediaPipe Tasks GenAI on Android with Coroutines Flow streaming, LiteLLM gateway proxy with fallback cascades), wires prompt prefix caching, and writes/runs automated eval test suites.
+
+### Reviewer Gate Additions (Steps 0l–0o)
+
+`mas-reviewer` remains the sole merging authority (`Approved: YES | NO`) and verifies:
+- **0l. GenAI Spec & Evals**: Prompt XML hierarchy, JSON Schema strictness, on-device RAM guard ($\ge 6\text{ GB}$), eval thresholds (Faithfulness $\ge 0.85$, Relevancy $\ge 0.85$, Recall $\ge 0.80$, Hallucination $\le 0.10$).
+- **0m. PRD Alignment**: Gherkin scenario coverage, zero P1/P2 scope creep, NFR budgets.
+- **0n. Backend Architecture**: Clean layering (Domain $\leftrightarrow$ Repo $\leftrightarrow$ DataSource), versioned forward-only migrations, parameterized SQL, idempotency keys, auth.
+- **0o. DevOps Infrastructure**: Multi-stage non-root containers, pinned action SHAs, complete `.env.example`, `/healthz` and `/readyz` probes.
+
 ## Protocol Files
 
 - [handoff-format.md](protocol/handoff-format.md) — full `/mas`
@@ -378,6 +495,40 @@ Specialist outputs — Reviewer reads conditionally when brief exists:
 | A11y | `.ai/context/a11y-reviews/{TASK_ID}.md` | WCAG table, Findings, Fix priority, Manual checklist |
 | I18n | `.ai/context/i18n-reviews/{TASK_ID}.md` | String inventory, Locale gaps, RTL, Recommendations |
 | Compliance | `.ai/context/compliance/{TASK_ID}.md` | Framework map, Gaps, Evidence, Remediation, Not legal advice |
+
+## MAS-11 briefs (v1.9.0)
+
+Specialist outputs — Reviewer and downstream agents read per subscription matrix:
+
+| Agent | Brief path | Required sections (see [brief-schemas.md](protocol/brief-schemas.md)) |
+|-------|------------|------------------------------------------------------------------------|
+| Product Manager | `.ai/context/prds/{TASK_ID}.md` | Problem statement, Personas & journeys, Functional stories (Gherkin), NFRs, Scope boundaries, KPIs |
+| GenAI Specialist (Design) | `.ai/context/genai/{TASK_ID}.md` | Model selection & routing, Prompt architecture (XML), Tool schemas (JSON), RAG & context, On-device SLM, Safety & OWASP, Eval metrics |
+| DevOps Specialist | `.ai/context/devops/{TASK_ID}.md` | Infrastructure & deployment, CI/CD pipeline spec, Environment & secrets, Container runtime spec, Verification & health checks |
+
+## Product Requirements Document Authoring
+
+Structured PRD intake and authoring for greenfield features:
+
+- [prd-authoring-standards.md](references/prd-authoring-standards.md)
+
+## GenAI Engineering Standards
+
+Enterprise-grade generative AI engineering across edge and cloud:
+
+- [genai-engineering-standards.md](references/genai-engineering-standards.md)
+
+## Backend Engineering Standards
+
+Server-side clean architecture, database migrations, SQL parameterization, and API security:
+
+- [backend-engineering-standards.md](references/backend-engineering-standards.md)
+
+## DevOps Platform Standards
+
+Containerization, CI/CD pipeline automation, Infrastructure as Code, and platform security:
+
+- [devops-platform-standards.md](references/devops-platform-standards.md)
 
 ## Build, Test & Visual QA
 

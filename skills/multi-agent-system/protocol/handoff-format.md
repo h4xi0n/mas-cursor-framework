@@ -8,7 +8,7 @@ All agent communication uses structured handoffs written to `.ai/handoffs/{TASK_
 TASK_ID: <id>
 MODE: FULL | LITE
 TIER: S | M | L | L+ | none
-TARGET_AGENT: <spec-reader|brainstorm|planner|architect|mas-figma|mas-visual-fidelity|android-dev|general-dev|osint|imaginer|ux-intelligence|perf-optimizer|release-readiness|test-strategy|security-auditor|dependency-risk|api-contract|test-executor|a11y|i18n|compliance|bug-fix|documenter|reviewer|commit|debate-synthesizer|token-auditor>
+TARGET_AGENT: <spec-reader|brainstorm|planner|architect|mas-figma|mas-visual-fidelity|android-dev|general-dev|osint|imaginer|ux-intelligence|perf-optimizer|release-readiness|test-strategy|security-auditor|dependency-risk|api-contract|test-executor|a11y|i18n|compliance|bug-fix|documenter|reviewer|commit|debate-synthesizer|token-auditor|mas-pm|mas-genai|mas-backend-dev|mas-devops>
 SPAWN_STATUS: spawned
 MODEL_CLASS: fast | normal | thinking    # optional; default from spawn-model-policy.md
 BRIEF_PATH: .ai/context/plans/{TASK_ID}.md # optional artifact forward — path only, not body
@@ -353,6 +353,92 @@ Lite alias: `LOG:y` per [handoff-format-lite.md](handoff-format-lite.md).
 LOG_CAPTURE: yes
 LOG_PACKAGE: com.example.app
 LOG_TAG: APP_TRACE
+```
+
+### MAS-11 Product Engineering routing flags (optional — predicates also fire from FILES/SCOPE)
+
+| Flag | Specialist | Default trigger |
+|------|------------|-----------------|
+| `PRD_AUTH: yes` | mas-pm | User request is greenfield or high ambiguity; entry agent before brainstorm |
+| `GENAI_SPEC: yes` | mas-genai | LLM / RAG / SLM components in scope; post-architect design pass |
+| `BACKEND: yes` | mas-backend-dev | Backend / DB migrations / server endpoints in scope; dev slot |
+| `DEVOPS: yes` | mas-devops | Docker / CI/CD / IaC in scope; post-dev platform slot |
+| `EVAL_SUITE: yes` | test-executor | LLM evaluation harness (`promptfoo`, `DeepEval`) execution |
+
+### Coordinator → Product Manager Handoff
+
+```
+TASK_ID: <id>
+TARGET_AGENT: mas-pm
+MODEL_CLASS: normal
+GOAL: Transform ambiguous user goals into a structured PRD with Gherkin user stories.
+SCOPE:
+* core product features and workflows
+PRD_AUTH: yes
+DELIVERABLE: Brief at .ai/context/prds/{TASK_ID}.md
+NEXT_AGENT: brainstorm | planner
+DONE
+```
+
+### Coordinator → GenAI Specialist (Design Mode) Handoff
+
+```
+TASK_ID: <id>
+TARGET_AGENT: mas-genai
+MODEL_CLASS: thinking
+GOAL: Architect prompt hierarchy, JSON tool schemas, RAG contracts, and eval metrics.
+BRIEF_PATH: .ai/context/architecture/{TASK_ID}.md
+GENAI_SPEC: yes
+DELIVERABLE: Brief at .ai/context/genai/{TASK_ID}.md
+NEXT_AGENT: test-strategy
+DONE
+```
+
+### Coordinator → GenAI Specialist (Dev Mode) Handoff
+
+```
+TASK_ID: <id>
+TARGET_AGENT: mas-genai
+MODEL_CLASS: normal
+GOAL: Implement AI client/gateway, prompt caching, on-device SLM RAM guard, and eval harnesses.
+BRIEF_PATH: .ai/context/genai/{TASK_ID}.md
+FILES:
+* target client and test paths
+DELIVERABLE: Implementation + eval tests passing
+NEXT_AGENT: documenter | mas-devops
+DONE
+```
+
+### Coordinator → Backend Developer Handoff
+
+```
+TASK_ID: <id>
+TARGET_AGENT: mas-backend-dev
+MODEL_CLASS: normal
+GOAL: Implement clean-architecture server services, migrations, and endpoints.
+BRIEF_PATH: .ai/context/plans/{TASK_ID}.md
+BACKEND: yes
+FILES:
+* backend controllers, repositories, migrations
+DELIVERABLE: Implementation + database migrations + tests passing
+NEXT_AGENT: mas-devops | documenter
+DONE
+```
+
+### Coordinator → DevOps Specialist Handoff
+
+```
+TASK_ID: <id>
+TARGET_AGENT: mas-devops
+MODEL_CLASS: normal
+GOAL: Author containerization, CI/CD pipeline automation, and IaC specifications.
+BRIEF_PATH: .ai/context/plans/{TASK_ID}.md
+DEVOPS: yes
+FILES:
+* Dockerfile, .github/workflows/, terraform/
+DELIVERABLE: Brief at .ai/context/devops/{TASK_ID}.md + platform code passing dry-run
+NEXT_AGENT: test-executor | documenter
+DONE
 ```
 
 ### Coordinator → Perf Optimizer Handoff
@@ -1321,3 +1407,147 @@ DONE
 
 Handoff in: `TASK_ID`, `PUSH: ASK | YES | NO`, optional Reviewer approval reference.  
 Agent must obtain explicit user yes before `git commit` and separate yes before `git push`.
+
+### Product Manager (mas-pm)
+
+```
+## Problem Statement & Value Proposition
+
+## Target Personas & User Journeys
+
+## Functional Requirements & User Stories
+
+## Non-Functional Requirements
+
+## Scope & Out-of-Scope Boundaries
+
+## Success Metrics & KPIs
+
+## Brief Path
+
+.ai/context/prds/{TASK_ID}.md
+
+## Recommended Next Agent
+
+brainstorm | planner
+
+DONE
+```
+
+### GenAI Specialist (mas-genai)
+
+Design Mode:
+
+```
+## Model Selection & Routing Strategy
+
+## Prompt Architecture
+
+## Structured Output & Tool Schemas
+
+## RAG & Context Architecture
+
+## On-Device SLM Spec
+
+## Safety Guardrails & OWASP Defenses
+
+## Evaluation & Quality Metrics
+
+## Brief Path
+
+.ai/context/genai/{TASK_ID}.md
+
+DONE
+```
+
+Dev Mode:
+
+```
+## Files
+
+<file path>
+
+<code>
+
+## AI Models & Gateways Configured
+
+<summary>
+
+## On-Device SLM Guard Verified
+
+<RAM check & model details or N/A>
+
+## Evaluation Results
+
+<DeepEval / promptfoo scores and pass/fail>
+
+## Tests
+
+<command + PASS/FAIL>
+
+DONE
+```
+
+### Backend Developer (mas-backend-dev)
+
+```
+## Files
+
+<file path>
+
+<code>
+
+## Database Migrations
+
+<migration files & status>
+
+## Endpoints Implemented
+
+<route, method, auth, idempotency>
+
+## Tests
+
+<command + PASS/FAIL>
+
+## Build
+
+<command + PASS/FAIL>
+
+DONE
+```
+
+### DevOps Specialist (mas-devops)
+
+```
+## Files
+
+<file path>
+
+<code>
+
+## Infrastructure & Deployment Topology
+
+<summary>
+
+## CI/CD Pipeline Spec & Trigger Matrix
+
+<summary>
+
+## Environment Variables & Secrets Contract
+
+<summary>
+
+## Container & Runtime Specifications
+
+<summary>
+
+## Dry-Run Verification Commands & Health Checks
+
+<command + PASS/FAIL>
+
+## Brief Path
+
+.ai/context/devops/{TASK_ID}.md
+
+DONE
+```
